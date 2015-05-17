@@ -1,0 +1,24 @@
+#include "cj.h"
+//#include "cjWeb.h"
+#include "siteManager.h"
+using namespace cj;
+
+#ifdef OS_WINDOWS
+#pragma comment(lib, "cjCore.lib")
+#endif
+
+int main(int argc, char* argv[])
+{
+
+	SiteManager *sm = new SiteManager(8080);
+	application = sm;
+
+	sm->logger = new Logger("/var/log/cjCms.log");
+
+	WebServerHandler *handler = new WebServerHandler();
+	sm->setHandler(handler);
+
+	sm->run();
+
+	return 0;
+}
