@@ -1,7 +1,6 @@
 #pragma once
 
-#include "webServer.h"
-#include "webSite.h"
+#include "cjCms.h"
 
 namespace cj {
 

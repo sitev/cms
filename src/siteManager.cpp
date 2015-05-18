@@ -1,6 +1,4 @@
-#include "webServer.h"
-#include "siteManager.h"
-#include "webSite.h"
+#include "cjCms.h"
 
 namespace cj {
 
@@ -21,10 +19,9 @@ void SiteManagerHandler::step(HttpRequest &request, HttpResponse &response) {
 	}
 
 	g_mutex.lock();
-	manager->paintPage(host, page);
+	manager->paintPage(host, page, response);
 	g_mutex.unlock();
 }
-
 
 //--------------------------------------------------------------------------------------------------
 //----------          class SiteManager          ---------------------------------------------------
@@ -49,9 +46,9 @@ void SiteManager::threadFunction(Socket *socket)
 }
 
 void SiteManager::fillSites() {
-	WebSite *wsSitev = new WebSite();
+	WebSite *wsSitev = new WebSite(this, "sitev.ru");
 	sites.insert(std::pair<string, WebSite*>("sitev.ru", wsSitev));
-	WebPage *wpSitevMain = new WebPage();
+	WebPage *wpSitevMain = new WebPage(wsSitev, "");
 	wsSitev->pages.insert(std::pair<string, WebPage*>("", wpSitevMain));
 }
 

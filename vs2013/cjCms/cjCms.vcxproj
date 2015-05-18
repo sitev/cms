@@ -89,6 +89,7 @@
     <ClCompile Include="..\..\src\webTemplate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\cjCms.h" />
     <ClInclude Include="..\..\src\siteManager.h" />
     <ClInclude Include="..\..\src\webModule.h" />
     <ClInclude Include="..\..\src\webPage.h" />
