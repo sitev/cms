@@ -44,6 +44,7 @@ protected:
 public:
 	WebServerHandler() {}
 	virtual void threadStep(Socket *socket);
+	virtual void internalStep(HttpRequest &request, HttpResponse &response);
 	virtual void step(HttpRequest &request, HttpResponse &response);
 };
 
@@ -51,6 +52,7 @@ class WebServer : public Application {
 protected:
 	WebServerHandler *handler;
 public:
+
 	int socketPort;
 	ServerSocket *ss;
 

@@ -105,9 +105,9 @@ bool RequestHeader::parse(Memory request) {
 		int pos3 = find(request, "\r\n");
 		if (pos3 <= 0) break;
 		string name = substr(request, pos1, pos2 - pos1);
-		string value = substr(request, pos2 + 1, pos3 - pos2 - 1);
+		string value = substr(request, pos2 + 2, pos3 - pos2 - 2);
 		add(name, value);
-		break;
+		//break;
 	}
 
 	/*
@@ -452,7 +452,7 @@ void WebServerHandler::threadStep(Socket *socket) {
 		response.memory.setPos(0);
 		response.memory.setSize(0);
 
-		//// ����� ���������� � recvAll {
+		//// recvAll {
 		while (true) {
 			int size = socket->getCurSize();
 			if (size <= 0) break;
@@ -464,7 +464,7 @@ void WebServerHandler::threadStep(Socket *socket) {
 		application->g_mutex.unlock();
 		LOGGER_OUT("MUTEX", "application->g_mutex.unlock();");
 
-		step(request, response);
+		internalStep(request, response);
 
 		LOGGER_OUT("MUTEX", "application->g_mutex.lock(); {");
 		application->g_mutex.lock();
@@ -479,28 +479,9 @@ void WebServerHandler::threadStep(Socket *socket) {
 	}
 }
 
-void WebServerHandler::step(HttpRequest &request, HttpResponse &response) {
-	int count = request.header.getCount();
-
-	string s = "";
-	for (int i = 0; i < count; i++) {
-		string name = request.header.getName_s(i);
-		string value = request.header.getValue_s(i);
-		s = s + name + " = " + value + "\r\n";
-	}
-
-	count = request.header.params.getCount();
-	s = s + to_string(count) + "\r\n";
-
-	for (int i = 0; i < count; i++) {
-		String name = request.header.params.getName(i);
-		String value = request.header.params.getValue(i);
-		s = s + name.toString8() + " = " + value.toString8() + "\r\n";
-	}
-
+void WebServerHandler::internalStep(HttpRequest &request, HttpResponse &response) {
 	if (!request.header.isFileFlag) {
-		s = "HTTP/1.1 200 OK\r\nContent-Length: " + to_string(s.length()) + "\r\n\r\n" + s + "\r\n";
-		response.memory.write((void*)(s.c_str()), s.length());
+		step(request, response);
 	}
 	else {
 		string fn = request.header.getValue_s("Params");
@@ -508,7 +489,7 @@ void WebServerHandler::step(HttpRequest &request, HttpResponse &response) {
 		File *f = new File(fn, "rb");
 		bool flag = f->isOpen();
 		if (flag) {
-			s = "HTTP/1.1 200 OK\r\nContent-Type: ";
+			string s = "HTTP/1.1 200 OK\r\nContent-Type: ";
 			if (request.header.fileExt == "html") s = s + "text/html";
 			else if (request.header.fileExt == "ico") s = s + "image/ico";
 			else if (request.header.fileExt == "png") s = s + "image/png";
@@ -532,6 +513,30 @@ void WebServerHandler::step(HttpRequest &request, HttpResponse &response) {
 		delete f;
 	}
 }
+
+void WebServerHandler::step(HttpRequest &request, HttpResponse &response) {
+	int count = request.header.getCount();
+
+	string s = "";
+	for (int i = 0; i < count; i++) {
+		string name = request.header.getName_s(i);
+		string value = request.header.getValue_s(i);
+		s = s + name + " = " + value + "\r\n";
+	}
+
+	count = request.header.params.getCount();
+	s = s + to_string(count) + "\r\n";
+
+	for (int i = 0; i < count; i++) {
+		String name = request.header.params.getName(i);
+		String value = request.header.params.getValue(i);
+		s = s + name.toString8() + " = " + value.toString8() + "\r\n";
+	}
+
+	s = "HTTP/1.1 200 OK\r\nContent-Length: " + to_string(s.length()) + "\r\n\r\n" + s + "\r\n";
+	response.memory.write((void*)(s.c_str()), s.length());
+}
+
 
 
 //--------------------------------------------------------------------------------------------------

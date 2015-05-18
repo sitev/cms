@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 
 	sm->logger = new Logger("/var/log/cjCms.log");
 
-	WebServerHandler *handler = new WebServerHandler();
+	SiteManagerHandler *handler = new SiteManagerHandler(sm);
 	sm->setHandler(handler);
 
 	sm->run();
