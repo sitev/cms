@@ -46,6 +46,7 @@ public:
 	virtual void threadStep(Socket *socket);
 	virtual void internalStep(HttpRequest &request, HttpResponse &response);
 	virtual void step(HttpRequest &request, HttpResponse &response);
+	virtual bool isPageExist(string host) { return false; }
 };
 
 class WebServer : public Application {

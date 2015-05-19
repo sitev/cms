@@ -480,12 +480,15 @@ void WebServerHandler::threadStep(Socket *socket) {
 }
 
 void WebServerHandler::internalStep(HttpRequest &request, HttpResponse &response) {
-	if (!request.header.isFileFlag) {
+	string host = request.header.getValue("Host").toString8();
+	//host = "sitev.ru";
+	if (!request.header.isFileFlag && isPageExist(host)) {
 		step(request, response);
 	}
 	else {
 		string fn = request.header.getValue_s("Params");
-		fn = "/var/www/" + fn;
+		if (fn == "") fn = "index.html";
+		fn = "/var/www/" + host + "/" + fn;
 		File *f = new File(fn, "rb");
 		bool flag = f->isOpen();
 		if (flag) {
@@ -636,6 +639,3 @@ void WebServer::threadStep(Socket *socket) {
 }
 
 }
-
-
-

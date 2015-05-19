@@ -12,6 +12,7 @@ public:
 	SiteManager *manager;
 	SiteManagerHandler(SiteManager *manager);
 	virtual void step(HttpRequest &request, HttpResponse &response);
+	virtual bool isPageExist(string host);
 };
 
 class SiteManager : public WebServer {
@@ -22,7 +23,7 @@ public:
 	SiteManager(int port = 80);
 	virtual void threadFunction(Socket *socket);
 	virtual void fillSites();
-	virtual void paintPage(string host, string page);
+	virtual void paintPage(HttpRequest &request, HttpResponse &response);
 };
 
 }
