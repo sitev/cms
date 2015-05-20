@@ -12,7 +12,7 @@ namespace cj {
 WebPage::WebPage(WebSite *site, string page) {
 	this->site = site;
 	this->page = page;
-	moduleId = 0; //0 - никакой модуль не привязан
+	moduleId = 0; //0 - пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	tplIndex = new WebTemplate();
 }
 
@@ -42,9 +42,8 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 	this->out("HTTP/1.1 200 OK\r\nContent-type: text/html; charset=UTF-8\r\n");
 	this->out("Content-Length: " + (String)len + "\r\n\r\n");
 	this->out(t);
-	this->out("\r\n");
 
-	application->logger_out(t);
+	LOGGER_OUT("DEBUG", t);
 	delete f;
 }
 

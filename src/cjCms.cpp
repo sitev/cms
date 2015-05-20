@@ -10,7 +10,7 @@ using namespace cj;
 int main(int argc, char* argv[])
 {
 
-	SiteManager *sm = new SiteManager(8080);
+	SiteManager *sm = new SiteManager(80);
 	application = sm;
 
 	sm->logger = new Logger("/var/log/cjCms.log");

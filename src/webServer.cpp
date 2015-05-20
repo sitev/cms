@@ -420,7 +420,7 @@ void HttpRequest::parse() {
 //	s.setLength(size);
 //	s = (char*)(memory.data);
 	int t1 = 0;//GetTickCount();
-	printf("tick1 = %d\n", t1);
+	//printf("tick1 = %d\n", t1);
 	/*
 	for (int i = 0; i < size; i++) {
 		char ch;
@@ -429,12 +429,12 @@ void HttpRequest::parse() {
 	}
 	*/
 	int t2 = 0;//GetTickCount();
-	printf("tick2 = %d %d\n", t2, t2 - t1);
+	//printf("tick2 = %d %d\n", t2, t2 - t1);
 	//header.parse(s);
 	header.parse(memory);
 
 	int t3 = 0;//GetTickCount();
-	printf("tick3 = %d %d\n", t3, t3 - t2);
+	//printf("tick3 = %d %d\n", t3, t3 - t2);
 	LOGGER_TRACE("Finish parse");
 }
 
@@ -460,6 +460,12 @@ void WebServerHandler::threadStep(Socket *socket) {
 		}
 		//// }
 
+		printf("----------\n");
+		int count = request.memory.getSize();
+		for (int i = 0; i < count; i++) {
+			printf("%c", ((char*)request.memory.data)[i]);
+		}
+		printf("\n");
 		request.parse();
 		application->g_mutex.unlock();
 		LOGGER_OUT("MUTEX", "application->g_mutex.unlock();");
@@ -482,13 +488,16 @@ void WebServerHandler::threadStep(Socket *socket) {
 void WebServerHandler::internalStep(HttpRequest &request, HttpResponse &response) {
 	string host = request.header.getValue("Host").toString8();
 	//host = "sitev.ru";
-	if (!request.header.isFileFlag && isPageExist(host)) {
+
+	if (!request.header.isFileFlag && isPageExist(host))
+	{
 		step(request, response);
 	}
 	else {
 		string fn = request.header.getValue_s("Params");
-		if (fn == "") fn = "index.html";
+		if (fn == "") fn = "index_tpl.html";
 		fn = "/var/www/" + host + "/" + fn;
+		printf("filename = %s\n", fn.c_str());
 		File *f = new File(fn, "rb");
 		bool flag = f->isOpen();
 		if (flag) {
