@@ -5,12 +5,13 @@ using namespace cj;
 
 #ifdef OS_WINDOWS
 #pragma comment(lib, "cjCore.lib")
+#pragma comment(lib, "cjWeb.lib")
 #endif
 
 int main(int argc, char* argv[])
 {
 
-	SiteManager *sm = new SiteManager(80);
+	SiteManager *sm = new SiteManager(8080);
 	application = sm;
 
 	sm->logger = new Logger("/var/log/cjCms.log");
