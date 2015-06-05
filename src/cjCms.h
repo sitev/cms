@@ -1,5 +1,5 @@
 #include "cj.h"
-#include "cjWeb.h"
+#include "cjNetwork.h"
 #include "siteManager.h"
 #include "webSite.h"
 #include "webPage.h"
