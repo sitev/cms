@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\..\cjWeb\src;..\..\..\cjCore\src;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\..\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\..\..\libraries\mysqlconn\include;..\..\..\cjNetwork\src;..\..\..\cjMySQL\src;..\..\..\cjCore\src;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\projects\libraries\mysqlconn\lib;..\..\..\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
