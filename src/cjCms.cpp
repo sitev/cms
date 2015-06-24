@@ -16,18 +16,6 @@ int main(int argc, char* argv[])
 	printf("port = 8080\n");
 	application = sm;
 
-
-	MySQL *query = new MySQL();
-	if (query->init()) {
-		if (query->connect("127.0.0.1", "root", "123qwe", "test")) {
-			if (query->exec("select * from mytab")) {
-				if (query->storeResult()) {
-					printf("row count = %d\n", query->getRowCount());
-				}
-			}
-		}
-	}
-
 	sm->logger = new Logger("/var/log/cjCms.log");
 
 	SiteManagerHandler *handler = new SiteManagerHandler(sm);

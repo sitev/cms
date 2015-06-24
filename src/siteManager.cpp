@@ -48,20 +48,56 @@ void SiteManager::threadFunction(Socket *socket)
 }
 
 void SiteManager::fillSites() {
-	WebSite *wsSitev = new WebSite(this, "sitev.ru");
-	sites.insert(std::pair<string, WebSite*>("sitev.ru", wsSitev));
-	WebPage *wpSitevMain = new WebPage(wsSitev, "");
-	wsSitev->pages.insert(std::pair<string, WebPage*>("", wpSitevMain));
+	MySQL *query = new MySQL();
+	if (!query->init()) return;
+	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return;
 
-	WebSite *wsVitartas = new WebSite(this, "vitartas.ru");
-	sites.insert(std::pair<string, WebSite*>("vitartas.ru", wsVitartas));
-	//WebPage *wpVitartasMain = new WebPage(wsVitartas, "");
-	//wsVitartas->pages.insert(std::pair<string, WebPage*>("", wpVitartasMain));
+	MySQL *queryPages = new MySQL();
+	if (!queryPages->init()) return;
+	if (!queryPages->connect("127.0.0.1", "root", "123qwe", "sitev")) return;
+
+	String sql = "select * from sites order by id";
+	if (query->exec(sql)) {
+		if (query->storeResult()) {
+			int count = query->getRowCount();
+			for (int i = 0; i < count; i++) {
+				int siteId = query->getFieldValue(i, "url").toInt();
+				string url = query->getFieldValue(i, "url").toString8();
+				WebSite *ws = new WebSite(this, url);
+				sites.insert(std::pair<string, WebSite*>(url, ws));
+
+				sql = "select p.url, p.moduleId, m.name from pages p, modules m where p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
+				if (queryPages->exec(sql)) {
+					if (queryPages->storeResult()) {
+						int count = queryPages->getRowCount();
+						for (int i = 0; i < count; i++) {
+							string url = queryPages->getFieldValue(i, "url").toString8();
+							WebPage *wp = new WebPage(ws, url);
+							ws->pages.insert(std::pair<string, WebPage*>(url, wp));
+						}
+					}
+				}
+				/*
+				sql = "select * from modules where order by id";
+				if (queryPages->exec(sql)) {
+					if (queryPages->storeResult()) {
+						int count = queryPages->getRowCount();
+						for (int i = 0; i < count; i++) {
+							string url = queryPages->getFieldValue(i, "url").toString8();
+							WebModule *wm = new WebModule(ws, url);
+							ws->pages.insert(std::pair<string, WebPage*>(url, wp));
+						}
+					}
+				}
+				*/
+			}
+		}
+	}
 }
 
 void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 	string host = request.header.getValue("Host").toString8();
-	//host = "sitev.ru";
+	if (host == "127.0.0.1:8080") host = "sitev.ru";
 	string page = "";
 	int count = request.header.params.getCount();
 	if (count > 0) {
