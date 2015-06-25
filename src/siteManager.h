@@ -19,11 +19,13 @@ public:
 class SiteManager : public WebServer {
 	mutex g_mutex;
 public:
+	map <int, WebModule*> modules;
 	map <string, WebSite*> sites;
 	string documentRoot;
 	SiteManager(int port = 80);
 	virtual void threadFunction(Socket *socket);
-	virtual void fillSites();
+	virtual void initModules();
+	virtual void initSites();
 	virtual void paintPage(HttpRequest &request, HttpResponse &response);
 };
 

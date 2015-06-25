@@ -31,7 +31,8 @@ bool SiteManagerHandler::isPageExist(string host) {
 
 SiteManager::SiteManager(int port) : WebServer(port) {
 	documentRoot = "/var/www";
-	fillSites();
+	initModules();
+	initSites();
 }
 
 void SiteManager::threadFunction(Socket *socket)
@@ -47,7 +48,12 @@ void SiteManager::threadFunction(Socket *socket)
 	g_mutex.unlock();
 }
 
-void SiteManager::fillSites() {
+void SiteManager::initModules() {
+	WebModule *wm = new WebModule(1, "Просто текст", "", "text");
+	modules.insert(std::pair<int, WebModule*>(1, wm));
+}
+
+void SiteManager::initSites() {
 	MySQL *query = new MySQL();
 	if (!query->init()) return;
 	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return;
@@ -66,30 +72,18 @@ void SiteManager::fillSites() {
 				WebSite *ws = new WebSite(this, url);
 				sites.insert(std::pair<string, WebSite*>(url, ws));
 
-				sql = "select p.url, p.moduleId, m.name from pages p, modules m where p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
+				sql = "select p.url, p.id, p.moduleId, m.name from pages p, modules m where p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
 				if (queryPages->exec(sql)) {
 					if (queryPages->storeResult()) {
 						int count = queryPages->getRowCount();
 						for (int i = 0; i < count; i++) {
 							string url = queryPages->getFieldValue(i, "url").toString8();
-							WebPage *wp = new WebPage(ws, url);
+							int pageId = queryPages->getFieldValue(i, "pageId").toInt();
+							WebPage *wp = new WebPage(ws, url, pageId);
 							ws->pages.insert(std::pair<string, WebPage*>(url, wp));
 						}
 					}
 				}
-				/*
-				sql = "select * from modules where order by id";
-				if (queryPages->exec(sql)) {
-					if (queryPages->storeResult()) {
-						int count = queryPages->getRowCount();
-						for (int i = 0; i < count; i++) {
-							string url = queryPages->getFieldValue(i, "url").toString8();
-							WebModule *wm = new WebModule(ws, url);
-							ws->pages.insert(std::pair<string, WebPage*>(url, wp));
-						}
-					}
-				}
-				*/
 			}
 		}
 	}

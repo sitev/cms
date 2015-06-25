@@ -9,10 +9,12 @@ namespace cj {
 //----------          class WebPage          -------------------------------------------------------
 //--------------------------------------------------------------------------------------------------
 
-WebPage::WebPage(WebSite *site, string page) {
+	WebPage::WebPage(WebSite *site, string page, int pageId, WebModule *module) {
 	this->site = site;
 	this->page = page;
-	moduleId = 0; //0 - ������� ������ �� ��������
+	this->pageId = pageId;
+	this->module = module;
+	moduleId = 0; //0 - никакой модуль не привязан
 	tplIndex = new WebTemplate();
 }
 
@@ -21,6 +23,8 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 	if (site == NULL) return;
 	if (site->manager == NULL) return;
 	if (site->host == "") return;
+
+
 	string fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
 	int ret;
 	struct stat buf;

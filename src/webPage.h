@@ -6,15 +6,18 @@
 namespace cj {
 
 class WebSite;
+class WebModule;
 
 class WebPage {
 	HttpResponse *response;
 public:
 	WebSite *site;
 	string page;
-	WebTemplate *tplIndex;
+	int pageId;
 	int moduleId;
-	WebPage(WebSite *site, string page);
+	WebModule *module;
+	WebTemplate *tplIndex;
+	WebPage(WebSite *site, string page, int pageId, WebModule *module = NULL);
 	virtual void paint(HttpRequest &request, HttpResponse &response);
 	virtual void out(String s);
 	virtual void out(String tag, String s);
