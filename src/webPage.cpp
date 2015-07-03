@@ -24,7 +24,6 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 	if (site->manager == NULL) return;
 	if (site->host == "") return;
 
-
 	string fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
 	int ret;
 	struct stat buf;
@@ -32,14 +31,15 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		fn = site->manager->documentRoot + "/common/index_tpl.html";
 	}
 
+	tplIndex->clearTag("content");
+	String content = this->module->generateContent(this);
+	tplIndex->out("content", content);
+
 	int count = tplIndex->lstTag.getCount();
 	File *f = new File(fn, "rb");
 	String s, t;
 	f->readAll(s);
 	tplIndex->exec(s, t);
-	
-	//s = "HTTP/1.1 200 OK\r\nContent-Length: " + ((String)t.getLength()) + "\r\n\r\n" + t + "\r\n";
-	//response.memory.write((void*)(s.toString8().c_str()), s.getLength());
 	
 	string t8 = t.toString8();
 	int len = t8.length();

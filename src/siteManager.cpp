@@ -49,7 +49,8 @@ void SiteManager::threadFunction(Socket *socket)
 }
 
 void SiteManager::initModules() {
-	WebModule *wm = new WebModule(1, "Просто текст", "", "text");
+//	WebModule *wm = new WebModule(1, "Просто текст", "", "text");
+	WebModule *wm = new StaticPageModule(this);
 	modules.insert(std::pair<int, WebModule*>(1, wm));
 }
 
@@ -67,7 +68,7 @@ void SiteManager::initSites() {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
 			for (int i = 0; i < count; i++) {
-				int siteId = query->getFieldValue(i, "url").toInt();
+				int siteId = query->getFieldValue(i, "id").toInt();
 				string url = query->getFieldValue(i, "url").toString8();
 				WebSite *ws = new WebSite(this, url);
 				sites.insert(std::pair<string, WebSite*>(url, ws));
@@ -78,8 +79,10 @@ void SiteManager::initSites() {
 						int count = queryPages->getRowCount();
 						for (int i = 0; i < count; i++) {
 							string url = queryPages->getFieldValue(i, "url").toString8();
-							int pageId = queryPages->getFieldValue(i, "pageId").toInt();
-							WebPage *wp = new WebPage(ws, url, pageId);
+							int pageId = queryPages->getFieldValue(i, "id").toInt();
+							int moduleId = queryPages->getFieldValue(i, "moduleId").toInt();
+							WebModule *wm = modules[moduleId];
+							WebPage *wp = new WebPage(ws, url, pageId, wm);
 							ws->pages.insert(std::pair<string, WebPage*>(url, wp));
 						}
 					}

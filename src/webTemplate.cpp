@@ -44,6 +44,17 @@ String WebTemplate::getTagValue(String tag) {
 	}
 	return s;
 }
+void WebTemplate::clearTag(String tag) {
+	String s = "";
+	int count = lstTag.getCount();
+	for (int i = 0; i < count; i++) {
+		ParamItem *pi = (ParamItem*)lstTag.getItem(i);
+		if (pi->name == tag) {
+			lstTag.del(i);
+			return;
+		}
+	}
+}
 void WebTemplate::exec(String source, String &target) {
 	String s = source;
 	target = "";
