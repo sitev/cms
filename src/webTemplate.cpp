@@ -22,7 +22,7 @@ WebTemplate::WebTemplate() {
 }
 
 bool WebTemplate::open(String url) {
-	File *f = new File(url, "r");
+	File *f = new File(url, "rb");
 	if (!f->isOpen()) return false;
 	f->readAll(html);
 	delete f;

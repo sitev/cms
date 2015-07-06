@@ -31,6 +31,7 @@ bool SiteManagerHandler::isPageExist(string host) {
 
 SiteManager::SiteManager(int port) : WebServer(port) {
 	documentRoot = "/var/www";
+	modulePath = documentRoot + "/modules";
 	initModules();
 	initSites();
 }
@@ -49,9 +50,11 @@ void SiteManager::threadFunction(Socket *socket)
 }
 
 void SiteManager::initModules() {
-//	WebModule *wm = new WebModule(1, "Просто текст", "", "text");
 	WebModule *wm = new StaticPageModule(this);
 	modules.insert(std::pair<int, WebModule*>(1, wm));
+
+	wm = new NewsModule(this);
+	modules.insert(std::pair<int, WebModule*>(2, wm));
 }
 
 void SiteManager::initSites() {
@@ -98,7 +101,8 @@ void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 	string page = "";
 	int count = request.header.params.getCount();
 	if (count > 0) {
-		page = request.header.params.getName(0).toString8();
+		page = request.header.params.getValue_s("p1");
+//		page = request.header.params.getName(0).toString8();
 	}
 
 	WebSite *ws = sites[host];
@@ -109,7 +113,5 @@ void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 		}
 	}
 }
-
-
 
 }

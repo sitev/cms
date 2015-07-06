@@ -24,15 +24,15 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 	if (site->manager == NULL) return;
 	if (site->host == "") return;
 
-	string fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
+	String fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
 	int ret;
 	struct stat buf;
-	if ((ret = stat(fn.c_str(), &buf)) != 0) {
+	if ((ret = stat(fn.toString8().c_str(), &buf)) != 0) {
 		fn = site->manager->documentRoot + "/common/index_tpl.html";
 	}
 
 	tplIndex->clearTag("content");
-	String content = this->module->generateContent(this);
+	String content = this->module->generateContent(this, request);
 	tplIndex->out("content", content);
 
 	int count = tplIndex->lstTag.getCount();
