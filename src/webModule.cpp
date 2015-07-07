@@ -17,6 +17,26 @@ void WebModule::setOptions(int moduleId, string name, string about, string url) 
 	this->url = url;
 }
 
+void WebModule::setOptionsFromDB(int moduleId) {
+	this->moduleId = moduleId;
+	MySQL *query = new MySQL();
+	if (!query->init()) return;
+	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return;
+
+	String sql = "select * from modules where id='" + (String)moduleId + "'";
+	if (query->exec(sql)) {
+		if (query->storeResult()) {
+			int count = query->getRowCount();
+			if (count > 0) {
+				name = query->getFieldValue(0, "name");
+				about = query->getFieldValue(0, "about");
+				url = query->getFieldValue(0, "url");
+				return;
+			}
+		}
+	}
+}
+
 String WebModule::getModuleUrl() {
 	MySQL *query = new MySQL();
 	if (!query->init()) return "";
@@ -41,7 +61,7 @@ String WebModule::getModuleUrl() {
 //---------------------------------------------------------------------------------------------------
 
 StaticPageModule::StaticPageModule(SiteManager *manager) : WebModule(manager) {
-	setOptions(1, "Просто текст", "", "text");
+	setOptionsFromDB(1);
 }
 String StaticPageModule::generateContent(WebPage *page, HttpRequest &request) {
 	MySQL *query = new MySQL();
@@ -64,20 +84,22 @@ String StaticPageModule::generateContent(WebPage *page, HttpRequest &request) {
 }
 
 //---------------------------------------------------------------------------------------------------
+//----------      class PostModule     --------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+PostModule::PostModule(SiteManager *manager) : WebModule(manager) {
+}
+
+//---------------------------------------------------------------------------------------------------
 //----------      class NewsModule     --------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------
-NewsModule::NewsModule(SiteManager *manager) : WebModule(manager) {
-	moduleId = 2;
-	url = getModuleUrl();
+NewsModule::NewsModule(SiteManager *manager) : PostModule(manager) {
+	setOptionsFromDB(2);
 }
 String NewsModule::generateContent(WebPage *page, HttpRequest &request) {
-	String itemId = request.header.params.getValue("p2");
+	String newsId = request.header.params.getValue("p2");
 
-	//if (itemId == "") 
-		return generateNews(page);
-//	else if (itemId == "input") paintNewsItemInput();
-//	else if (itemId == "post") paintNewsItemPost();
-//	else paintNewsItemView(itemId);
+	if (newsId == "") return generateNews(page);
+	else return generateNewsItemView(page, newsId);
 }
 
 String NewsModule::generateNews(WebPage *page) {
@@ -123,17 +145,23 @@ String NewsModule::generateNews(WebPage *page) {
 		return tpl->html;
 	}
 }
-/*
-void NewsModule::paintNewsItemView(String newsId) {
+
+String NewsModule::generateNewsItemView(WebPage *page, String newsId) {
 	//	String sql = "select * from dataNews where id='" + newsId + "'";
-	String sql = "select dt, name, about, text from dataNews n, data d where d.dataId=n.id and d.pageId='" + pageId + "' and d.moduleId='" +
-		moduleId + "' and n.num='" + newsId + "' order by n.num desc";
+	String sql = "select dt, name, about, text from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
+		(String)moduleId + "' and n.num='" + newsId + "' order by n.num desc";
+
+	MySQL *query = new MySQL();
+	if (!query->init()) return "";
+	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return "";
+	query->exec("SET NAMES utf8");
+
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
 			if (count > 0) {
-				HTMLTemplate * tpl = new HTMLTemplate();
-				if (tpl->open(platform->modulePath + "/" + url + "/view_tpl.html")) {
+				WebTemplate * tpl = new WebTemplate();
+				if (tpl->open(manager->modulePath + "/" + url + "/view_tpl.html")) {
 					String dt = query->getFieldValue(0, "dt");
 					dt = dtRus(dt, 1);
 					String name = query->getFieldValue(0, "name");
@@ -143,17 +171,15 @@ void NewsModule::paintNewsItemView(String newsId) {
 					tpl->out("dt", dt);
 					tpl->out("name", name);
 					tpl->out("text", text);
-					tpl->changeAllTag();
-					page->out("out", tpl->html);
-					page->out("title", name);
-					page->out("keywords", name);
-					page->out("description", name);
+					tpl->exec();
+					return tpl->html;
 				}
 			}
 		}
 	}
+	return "";
 }
-
+/*
 void NewsModule::paintNewsItemInput() {
 	HTMLTemplate * tpl = new HTMLTemplate();
 	if (tpl->open(platform->modulePath + "/" + url + "/input_tpl.html")) {
@@ -206,29 +232,50 @@ void NewsModule::paintNewsItemPost() {
 	}
 }
 */
-//---------------------------------------------------------------------------------------------------
-//----------      class BoardModule     -------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-BoardModule::BoardModule(SiteManager *manager) : NewsModule(manager) {
-	moduleId = 7;
-	url = getModuleUrl();
-}
-
-//---------------------------------------------------------------------------------------------------
-//----------      class GuestbookModule     ---------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-GuestbookModule::GuestbookModule(SiteManager *manager) : NewsModule(manager) {
-	moduleId = 4;
-	url = getModuleUrl();
-}
 
 //---------------------------------------------------------------------------------------------------
 //----------      class BlogModule     --------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------
 BlogModule::BlogModule(SiteManager *manager) : NewsModule(manager) {
-	moduleId = 11;
-	url = getModuleUrl();
+	setOptionsFromDB(3);
 }
+
+
+//---------------------------------------------------------------------------------------------------
+//----------      class GuestbookModule     ---------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+GuestbookModule::GuestbookModule(SiteManager *manager) : NewsModule(manager) {
+	setOptionsFromDB(4);
+}
+
+//---------------------------------------------------------------------------------------------------
+//----------      class BoardModule     -------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+BoardModule::BoardModule(SiteManager *manager) : NewsModule(manager) {
+	setOptionsFromDB(5);
+}
+
+//---------------------------------------------------------------------------------------------------
+//----------      class ArticleModule     -----------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+ArticleModule::ArticleModule(SiteManager *manager) : NewsModule(manager) {
+	setOptionsFromDB(6);
+}
+
+//---------------------------------------------------------------------------------------------------
+//----------      class QuestionAnswerModule     ----------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+QuestionAnswerModule::QuestionAnswerModule(SiteManager *manager) : NewsModule(manager) {
+	setOptionsFromDB(7);
+}
+
+//---------------------------------------------------------------------------------------------------
+//----------      class ForumModule     -------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+ForumModule::ForumModule(SiteManager *manager) : PostModule(manager) {
+	setOptionsFromDB(8);
+}
+
 
 
 

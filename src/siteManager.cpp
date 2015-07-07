@@ -51,10 +51,28 @@ void SiteManager::threadFunction(Socket *socket)
 
 void SiteManager::initModules() {
 	WebModule *wm = new StaticPageModule(this);
-	modules.insert(std::pair<int, WebModule*>(1, wm));
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
 
 	wm = new NewsModule(this);
-	modules.insert(std::pair<int, WebModule*>(2, wm));
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+	wm = new BlogModule(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+	wm = new GuestbookModule(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+	wm = new BoardModule(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+	wm = new ArticleModule(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+	wm = new QuestionAnswerModule(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+//	wm = new ForumModule(this);
+//	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
 }
 
 void SiteManager::initSites() {
