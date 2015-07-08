@@ -19,9 +19,12 @@ void WebModule::setOptions(int moduleId, string name, string about, string url) 
 
 void WebModule::setOptionsFromDB(int moduleId) {
 	this->moduleId = moduleId;
+	/*
 	MySQL *query = new MySQL();
 	if (!query->init()) return;
 	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return;
+	*/
+	MySQL *query = manager->newQuery();
 
 	String sql = "select * from modules where id='" + (String)moduleId + "'";
 	if (query->exec(sql)) {
@@ -38,9 +41,12 @@ void WebModule::setOptionsFromDB(int moduleId) {
 }
 
 String WebModule::getModuleUrl() {
+	/*
 	MySQL *query = new MySQL();
 	if (!query->init()) return "";
 	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return "";
+	*/
+	MySQL *query = manager->newQuery();
 
 	String sql = "select * from modules where id='" + (String)moduleId + "'";
 	if (query->exec(sql)) {
@@ -64,10 +70,14 @@ StaticPageModule::StaticPageModule(SiteManager *manager) : WebModule(manager) {
 	setOptionsFromDB(1);
 }
 String StaticPageModule::generateContent(WebPage *page, HttpRequest &request) {
+	/*
 	MySQL *query = new MySQL();
 	if (!query->init()) return "";
 	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return "";
 	query->exec("SET NAMES utf8");
+	*/
+	MySQL *query = manager->newQuery();
+
 
 	String sql = "select txt.value from data d, dataText txt where d.dataId=txt.id and d.pageId='" + (String)page->pageId + "'";
 	if (query->exec(sql)) {
@@ -107,11 +117,13 @@ String NewsModule::generateNews(WebPage *page) {
 	if (tpl->open(manager->modulePath + "/" + url + "/index_tpl.html")) {
 		String sql = "select * from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" + (String)moduleId + "' order by dt desc";
 		//page->out("out", sql);
-
+/*
 		MySQL *query = new MySQL();
 		if (!query->init()) return "";
 		if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return "";
 		query->exec("SET NAMES utf8");
+*/
+		MySQL *query = manager->newQuery();
 
 		if (query->exec(sql)) {
 			if (query->storeResult()) {
@@ -151,11 +163,13 @@ String NewsModule::generateNewsItemView(WebPage *page, String newsId) {
 	//	String sql = "select * from dataNews where id='" + newsId + "'";
 	String sql = "select dt, name, about, text from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
 		(String)moduleId + "' and n.num='" + newsId + "' order by n.num desc";
-
+/*
 	MySQL *query = new MySQL();
 	if (!query->init()) return "";
 	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return "";
 	query->exec("SET NAMES utf8");
+*/
+	MySQL *query = manager->newQuery();
 
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
@@ -224,7 +238,7 @@ void NewsModule::paintNewsItemPost() {
 					sql = "insert into data (pageId, dataId, moduleId, userId) values ('" + pageId + "', '" +
 						lastId + "', '" + moduleId + "', '" + platform->userId + "')";
 					if (query->exec(sql)) {
-						page->out("out", "<h2>Данные были добавлены...</h2>");
+						page->out("out", "<h2>пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ...</h2>");
 
 					}
 				}

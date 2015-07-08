@@ -32,6 +32,7 @@ bool SiteManagerHandler::isPageExist(string host) {
 SiteManager::SiteManager(int port) : WebServer(port) {
 	documentRoot = "/var/www";
 	modulePath = documentRoot + "/modules";
+	printf("\nInit all...\n");
 	initModules();
 	initSites();
 }
@@ -75,19 +76,33 @@ void SiteManager::initModules() {
 //	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
 }
 
-void SiteManager::initSites() {
+MySQL* SiteManager::newQuery() {
+	printf("newQuery();\n");
 	MySQL *query = new MySQL();
-	if (!query->init()) return;
-	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return;
+	if (!query->init()) {
+		printf("initSites: !query->init()\n");
+		return NULL;
+	}
+	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) {
+		printf("initSites: !query->connect()\n");
+		return NULL;
+	}
+	query->exec("SET NAMES utf8");
+	return query;
+}
 
-	MySQL *queryPages = new MySQL();
+void SiteManager::initSites() {
+	printf("initSites();\n");
+	MySQL *query = newQuery();
+	MySQL *queryPages = newQuery(); /*new MySQL();
 	if (!queryPages->init()) return;
-	if (!queryPages->connect("127.0.0.1", "root", "123qwe", "sitev")) return;
+	if (!queryPages->connect("127.0.0.1", "root", "123qwe", "sitev")) return;*/
 
 	String sql = "select * from sites order by id";
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
+			printf("count = %d\n", count);
 			for (int i = 0; i < count; i++) {
 				int siteId = query->getFieldValue(i, "id").toInt();
 				string url = query->getFieldValue(i, "url").toString8();

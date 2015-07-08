@@ -22,8 +22,10 @@ public:
 	map <int, WebModule*> modules;
 	map <string, WebSite*> sites;
 	String documentRoot, modulePath;
+
 	SiteManager(int port = 80);
 	virtual void threadFunction(Socket *socket);
+	virtual MySQL* newQuery();
 	virtual void initModules();
 	virtual void initSites();
 	virtual void paintPage(HttpRequest &request, HttpResponse &response);
