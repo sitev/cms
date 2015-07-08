@@ -127,6 +127,7 @@ String NewsModule::generateNews(WebPage *page) {
 
 					WebTemplate *tpl1 = new WebTemplate();
 					if (tpl1->open(manager->modulePath + "/" + url + "/item_tpl.html")) {
+						tpl1->out("page", page->page);
 						tpl1->out("num", num);
 						tpl1->out("dt", dt);
 						tpl1->out("name", name);
