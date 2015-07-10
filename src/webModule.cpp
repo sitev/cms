@@ -80,6 +80,7 @@ String StaticPageModule::generateContent(WebPage *page, HttpRequest &request) {
 
 
 	String sql = "select txt.value from data d, dataText txt where d.dataId=txt.id and d.pageId='" + (String)page->pageId + "'";
+	printf("sql = %s\n", sql.toString8().c_str());
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
@@ -106,10 +107,16 @@ NewsModule::NewsModule(SiteManager *manager) : PostModule(manager) {
 	setOptionsFromDB(2);
 }
 String NewsModule::generateContent(WebPage *page, HttpRequest &request) {
+	printf("news 1\n");
 	String newsId = request.header.params.getValue("p2");
+
+	printf("news 2\n");
 
 	if (newsId == "") return generateNews(page);
 	else return generateNewsItemView(page, newsId);
+
+	printf("news 3\n");
+
 }
 
 String NewsModule::generateNews(WebPage *page) {
@@ -131,14 +138,17 @@ String NewsModule::generateNews(WebPage *page) {
 				for (int i = 0; i < count; i++) {
 					String id = query->getFieldValue(i, "id");
 					String dt = query->getFieldValue(i, "dt");
-					dt = dtRus(dt, 1);
+					dt = dtRus(dt, 0);
 					String name = query->getFieldValue(i, "name");
 					String about = query->getFieldValue(i, "about");
 					String text = query->getFieldValue(i, "text");
 					int num = query->getFieldValue(i, "num").toInt();
 
 					WebTemplate *tpl1 = new WebTemplate();
-					if (tpl1->open(manager->modulePath + "/" + url + "/item_tpl.html")) {
+					String fn;
+					if (i + 1 != count) fn = manager->modulePath + "/" + url + "/item_tpl.html";
+					else fn = manager->modulePath + "/" + url + "/itemLast_tpl.html";
+					if (tpl1->open(fn)) {
 						tpl1->out("page", page->page);
 						tpl1->out("num", num);
 						tpl1->out("dt", dt);
@@ -178,7 +188,7 @@ String NewsModule::generateNewsItemView(WebPage *page, String newsId) {
 				WebTemplate * tpl = new WebTemplate();
 				if (tpl->open(manager->modulePath + "/" + url + "/view_tpl.html")) {
 					String dt = query->getFieldValue(0, "dt");
-					dt = dtRus(dt, 1);
+					dt = dtRus(dt, 0);
 					String name = query->getFieldValue(0, "name");
 					String about = query->getFieldValue(0, "about");
 					String text = query->getFieldValue(0, "text");

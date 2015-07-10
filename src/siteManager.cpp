@@ -83,7 +83,7 @@ MySQL* SiteManager::newQuery() {
 		printf("initSites: !query->init()\n");
 		return NULL;
 	}
-	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) {
+	if (!query->connect("127.0.0.1", "root", "mzsitev.ru", "sitev")) {
 		printf("initSites: !query->connect()\n");
 		return NULL;
 	}
@@ -129,22 +129,38 @@ void SiteManager::initSites() {
 }
 
 void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
+	printf("paintPage\n");
 	string host = request.header.getValue("Host").toString8();
+
+	printf("host = %s\n", host.c_str());
+
 	if (host == "127.0.0.1:8080") host = "sitev.ru";
+	if (host == "sitev.ru:8082") host = "sitev.ru";
 	string page = "";
 	int count = request.header.params.getCount();
+
 	if (count > 0) {
 		page = request.header.params.getValue_s("p1");
 //		page = request.header.params.getName(0).toString8();
 	}
 
+	printf("page = %s\n", page.c_str());
+
+	printf("1\n");
 	WebSite *ws = sites[host];
+	printf("2\n");
 	if (ws != NULL) {
+		printf("3\n");
 		WebPage *wp = ws->pages[page];
+		printf("4\n");
 		if (wp != NULL) {
+			printf("5\n");
 			wp->paint(request, response);
+			printf("6\n");
 		}
 	}
+
+	printf("paintPage end \n");
 }
 
 }
