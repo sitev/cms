@@ -204,7 +204,7 @@ int SiteManager::getUserId(String uuid) {
 
 String SiteManager::isPasswordCorrect(String password) {
 	int count = password.getLength();
-	if (count < 6) return "Длина пароля не может быть короче 5-ти символов";
+	if (count < 6) return "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 5-пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
 	return "";
 }
 
