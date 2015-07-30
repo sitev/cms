@@ -74,6 +74,10 @@ void SiteManager::initModules() {
 
 //	wm = new ForumModule(this);
 //	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+	wm = new UserModule(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
 }
 
 MySQL* SiteManager::newQuery() {
@@ -83,7 +87,7 @@ MySQL* SiteManager::newQuery() {
 		printf("initSites: !query->init()\n");
 		return NULL;
 	}
-	if (!query->connect("127.0.0.1", "root", "mzsitev.ru", "sitev")) {
+	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) {
 		printf("initSites: !query->connect()\n");
 		return NULL;
 	}
@@ -94,9 +98,7 @@ MySQL* SiteManager::newQuery() {
 void SiteManager::initSites() {
 	printf("initSites();\n");
 	MySQL *query = newQuery();
-	MySQL *queryPages = newQuery(); /*new MySQL();
-	if (!queryPages->init()) return;
-	if (!queryPages->connect("127.0.0.1", "root", "123qwe", "sitev")) return;*/
+	MySQL *queryPages = newQuery(); 
 
 	String sql = "select * from sites order by id";
 	if (query->exec(sql)) {
@@ -135,13 +137,11 @@ void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 	printf("host = %s\n", host.c_str());
 
 	if (host == "127.0.0.1:8080") host = "sitev.ru";
-	if (host == "sitev.ru:8082") host = "sitev.ru";
 	string page = "";
-	int count = request.header.params.getCount();
+	int count = request.header.GET.getCount();
 
 	if (count > 0) {
-		page = request.header.params.getValue_s("p1");
-//		page = request.header.params.getName(0).toString8();
+		page = request.header.GET.getValue_s("p1");
 	}
 
 	printf("page = %s\n", page.c_str());
@@ -161,6 +161,51 @@ void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 	}
 
 	printf("paintPage end \n");
+}
+
+String SiteManager::generateUserPassword() {
+	int count = 8;
+	String symbols = "123456789ABCDEFGHIJKLMNPQRSTUVWXYZ";
+	String password = "";
+	for (int i = 0; i < count; i++) {
+		int rnd = (int)(random() * (symbols.getLength() - 1));
+		password += symbols.getCharString(rnd);
+	}
+	return password;
+}
+
+String SiteManager::getLogin(String uuid) {
+	MySQL *query = newQuery();
+	String sql = (String)"SELECT * FROM uuid u1, users u2  WHERE u1.uuid='" + uuid + "' and u1.userId=u2.id";
+	if (query->exec(sql)) {
+		if (query->storeResult()) {
+			int count = query->getRowCount();
+			if (count == 0) return "";
+			String login = query->getFieldValue(0, "email");
+			return login;
+		}
+	}
+	return "";
+}
+
+int SiteManager::getUserId(String uuid) {
+	MySQL *query = newQuery();
+	String sql = "select * from uuid u1, users u2 where u1.uuid='" + uuid + "' and u1.userId=u2.id";
+	if (query->exec(sql)) {
+		if (query->storeResult()) {
+			int count = query->getRowCount();
+			if (count == 0) return 0;
+			int userId = query->getFieldValue(0, "userId").toInt();
+			return userId;
+		}
+	}
+	return 0;
+}
+
+String SiteManager::isPasswordCorrect(String password) {
+	int count = password.getLength();
+	if (count < 6) return "Длина пароля не может быть короче 5-ти символов";
+	return "";
 }
 
 }

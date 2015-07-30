@@ -17,20 +17,21 @@ public:
 	WebModule(SiteManager *manager);
 	virtual void setOptions(int moduleId, string name, string about, string url);
 	virtual void setOptionsFromDB(int moduleId);
-	virtual String generateContent(WebPage *page, HttpRequest &request) = 0;
+	virtual void paint(WebPage *page, HttpRequest &request) = 0;
 	virtual String getModuleUrl();
+	virtual void paint404(WebPage *page, HttpRequest &request);
 };
 
 class StaticPageModule : public WebModule {
 public:
 	StaticPageModule(SiteManager *manager);
-	virtual String generateContent(WebPage *page, HttpRequest &request);
+	virtual void paint(WebPage *page, HttpRequest &request);
 };
 
 class PostModule : public WebModule {
 public:
 	PostModule(SiteManager *manager);
-	virtual String generateContent(WebPage *page, HttpRequest &request) = 0;
+	virtual void paint(WebPage *page, HttpRequest &request) = 0;
 };
 
 class NewsModule : public PostModule {
@@ -38,9 +39,9 @@ protected:
 	String caption;
 public:
 	NewsModule(SiteManager *manager);
-	virtual String generateContent(WebPage *page, HttpRequest &request);
-	virtual String generateNews(WebPage *page);
-	virtual String generateNewsItemView(WebPage *page, String newsId);
+	virtual void paint(WebPage *page, HttpRequest &request);
+	virtual void paintNews(WebPage *page);
+	virtual void paintNewsItemView(WebPage *page, String newsId);
 };
 
 class BlogModule : public NewsModule {
@@ -73,7 +74,5 @@ class ForumModule : public PostModule {
 public:
 	ForumModule(SiteManager *manager);
 };
-
-
 
 }

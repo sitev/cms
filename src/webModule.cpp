@@ -19,11 +19,6 @@ void WebModule::setOptions(int moduleId, string name, string about, string url) 
 
 void WebModule::setOptionsFromDB(int moduleId) {
 	this->moduleId = moduleId;
-	/*
-	MySQL *query = new MySQL();
-	if (!query->init()) return;
-	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return;
-	*/
 	MySQL *query = manager->newQuery();
 
 	String sql = "select * from modules where id='" + (String)moduleId + "'";
@@ -41,11 +36,6 @@ void WebModule::setOptionsFromDB(int moduleId) {
 }
 
 String WebModule::getModuleUrl() {
-	/*
-	MySQL *query = new MySQL();
-	if (!query->init()) return "";
-	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return "";
-	*/
 	MySQL *query = manager->newQuery();
 
 	String sql = "select * from modules where id='" + (String)moduleId + "'";
@@ -61,6 +51,11 @@ String WebModule::getModuleUrl() {
 	return "";
 }
 
+void WebModule::paint404(WebPage *page, HttpRequest &request) {
+
+}
+
+
 
 //---------------------------------------------------------------------------------------------------
 //----------      class StaticPageModule     --------------------------------------------------------
@@ -69,13 +64,7 @@ String WebModule::getModuleUrl() {
 StaticPageModule::StaticPageModule(SiteManager *manager) : WebModule(manager) {
 	setOptionsFromDB(1);
 }
-String StaticPageModule::generateContent(WebPage *page, HttpRequest &request) {
-	/*
-	MySQL *query = new MySQL();
-	if (!query->init()) return "";
-	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return "";
-	query->exec("SET NAMES utf8");
-	*/
+void StaticPageModule::paint(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 
 
@@ -86,12 +75,10 @@ String StaticPageModule::generateContent(WebPage *page, HttpRequest &request) {
 			int count = query->getRowCount();
 			if (count > 0)  {
 				String content = query->getFieldValue(0, "value");
-				return content;
+				page->out("content", content);
 			}
 		}
 	}
-
-	return "";
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -106,30 +93,24 @@ PostModule::PostModule(SiteManager *manager) : WebModule(manager) {
 NewsModule::NewsModule(SiteManager *manager) : PostModule(manager) {
 	setOptionsFromDB(2);
 }
-String NewsModule::generateContent(WebPage *page, HttpRequest &request) {
+void NewsModule::paint(WebPage *page, HttpRequest &request) {
 	printf("news 1\n");
-	String newsId = request.header.params.getValue("p2");
+	String newsId = request.header.GET.getValue("p2");
 
 	printf("news 2\n");
 
-	if (newsId == "") return generateNews(page);
-	else return generateNewsItemView(page, newsId);
+	if (newsId == "") paintNews(page);
+	return paintNewsItemView(page, newsId);
 
 	printf("news 3\n");
 
 }
 
-String NewsModule::generateNews(WebPage *page) {
+void NewsModule::paintNews(WebPage *page) {
 	WebTemplate *tpl = new WebTemplate();
 	if (tpl->open(manager->modulePath + "/" + url + "/index_tpl.html")) {
 		String sql = "select * from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" + (String)moduleId + "' order by dt desc";
 		//page->out("out", sql);
-/*
-		MySQL *query = new MySQL();
-		if (!query->init()) return "";
-		if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return "";
-		query->exec("SET NAMES utf8");
-*/
 		MySQL *query = manager->newQuery();
 
 		if (query->exec(sql)) {
@@ -165,20 +146,13 @@ String NewsModule::generateNews(WebPage *page) {
 
 		tpl->out("caption", caption);
 		tpl->exec();
-		return tpl->html;
+		page->out("content", tpl->html);
 	}
 }
 
-String NewsModule::generateNewsItemView(WebPage *page, String newsId) {
-	//	String sql = "select * from dataNews where id='" + newsId + "'";
+void NewsModule::paintNewsItemView(WebPage *page, String newsId) {
 	String sql = "select dt, name, about, text from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
 		(String)moduleId + "' and n.num='" + newsId + "' order by n.num desc";
-/*
-	MySQL *query = new MySQL();
-	if (!query->init()) return "";
-	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) return "";
-	query->exec("SET NAMES utf8");
-*/
 	MySQL *query = manager->newQuery();
 
 	if (query->exec(sql)) {
@@ -197,66 +171,12 @@ String NewsModule::generateNewsItemView(WebPage *page, String newsId) {
 					tpl->out("name", name);
 					tpl->out("text", text);
 					tpl->exec();
-					return tpl->html;
-				}
-			}
-		}
-	}
-	return "";
-}
-/*
-void NewsModule::paintNewsItemInput() {
-	HTMLTemplate * tpl = new HTMLTemplate();
-	if (tpl->open(platform->modulePath + "/" + url + "/input_tpl.html")) {
-		String p1 = page->getParamValue(ptGET, "p1");
-		tpl->out("p1", p1);
-		tpl->changeAllTag();
-		page->out("out", tpl->html);
-	}
-}
-
-void NewsModule::paintNewsItemPost() {
-	String name = page->getParamValue(ptPOST, "name");
-	String about = page->getParamValue(ptPOST, "about");
-	String text = page->getParamValue(ptPOST, "text");
-
-	String sql = "select n.id, n.num from dataNews n, data d where d.dataId=n.id and d.pageId='" + pageId + "' and d.moduleId='" +
-		moduleId + "' order by n.num desc";
-	//page->out("out", sql);
-
-	int num = 0;
-	if (query->exec(sql)) {
-		if (query->storeResult()) {
-			int count = query->getRowCount();
-			if (count > 0) {
-				num = query->getFieldValue(0, "num").toInt();
-			}
-		}
-	}
-	num++;
-
-	sql = "insert into dataNews (name, about, text, num) values ('" + name + "', '" + about + "', '" +
-		text + "', '" + (String)num + "')";
-	//page->out("out", sql);
-	if (query->exec(sql)) {
-		sql = "select LAST_INSERT_ID();";
-		if (query->exec(sql)) {
-			if (query->storeResult()) {
-				int count = query->getRowCount();
-				if (count > 0) {
-					String lastId = query->getFieldValue(0, "LAST_INSERT_ID()");
-					sql = "insert into data (pageId, dataId, moduleId, userId) values ('" + pageId + "', '" +
-						lastId + "', '" + moduleId + "', '" + platform->userId + "')";
-					if (query->exec(sql)) {
-						page->out("out", "<h2>������ ���� ���������...</h2>");
-
-					}
+					page->out("content", tpl->html);
 				}
 			}
 		}
 	}
 }
-*/
 
 //---------------------------------------------------------------------------------------------------
 //----------      class BlogModule     --------------------------------------------------------------
@@ -300,8 +220,5 @@ QuestionAnswerModule::QuestionAnswerModule(SiteManager *manager) : NewsModule(ma
 ForumModule::ForumModule(SiteManager *manager) : PostModule(manager) {
 	setOptionsFromDB(8);
 }
-
-
-
 
 }

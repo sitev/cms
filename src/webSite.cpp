@@ -9,7 +9,9 @@ namespace cj {
 WebSite::WebSite(SiteManager *manager, string host) {
 	this->manager = manager;
 	this->host = host;
-	designId = 0; //0 - кастомный дизайн
+	login = "";
+	userId = 0;
+	tplId = 0; //0 - кастомный дизайн
 }
 
 }

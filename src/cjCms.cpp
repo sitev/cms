@@ -1,5 +1,4 @@
 #include "cj.h"
-//#include "cjWeb.h"
 #include "siteManager.h"
 using namespace cj;
 
@@ -12,8 +11,8 @@ using namespace cj;
 
 int main(int argc, char* argv[])
 {
-	SiteManager *sm = new SiteManager(80);
-	printf("port = 80\n");
+	SiteManager *sm = new SiteManager(8080);
+	printf("port = 8080\n");
 	application = sm;
 
 	sm->logger = new Logger("/var/log/cjCms.log");
@@ -22,7 +21,6 @@ int main(int argc, char* argv[])
 	sm->setHandler(handler);
 
 	sm->run();
-
 
 	return 0;
 }

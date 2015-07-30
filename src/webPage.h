@@ -21,6 +21,7 @@ public:
 	virtual void paint(HttpRequest &request, HttpResponse &response);
 	virtual void out(String s);
 	virtual void out(String tag, String s);
+	virtual String htmlEntities(String s);
 };
 
 }

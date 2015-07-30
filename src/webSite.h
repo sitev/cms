@@ -10,8 +10,11 @@ class SiteManager;
 class WebSite {
 public:
 	SiteManager *manager;
-	string host;
-	int designId;
+	String host;
+	int tplId;
+	String login;
+	int userId;
+
 	map <string, WebPage*> pages;
 	WebSite(SiteManager *manager, string host);
 };

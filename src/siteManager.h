@@ -29,6 +29,12 @@ public:
 	virtual void initModules();
 	virtual void initSites();
 	virtual void paintPage(HttpRequest &request, HttpResponse &response);
+
+	String generateUserPassword();
+	String getLogin(String uuid);
+	int getUserId(String uuid);
+	String isPasswordCorrect(String password);
+
 };
 
 }

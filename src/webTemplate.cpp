@@ -47,11 +47,11 @@ String WebTemplate::getTagValue(String tag) {
 void WebTemplate::clearTag(String tag) {
 	String s = "";
 	int count = lstTag.getCount();
-	for (int i = 0; i < count; i++) {
+	for (int i = count - 1; i >= 0; i--) {
 		ParamItem *pi = (ParamItem*)lstTag.getItem(i);
 		if (pi->name == tag) {
 			lstTag.del(i);
-			return;
+			//return;
 		}
 	}
 }
