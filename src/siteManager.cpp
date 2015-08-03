@@ -87,7 +87,7 @@ MySQL* SiteManager::newQuery() {
 		printf("initSites: !query->init()\n");
 		return NULL;
 	}
-	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) {
+	if (!query->connect("127.0.0.1", "root", "123", "sitev")) {
 		printf("initSites: !query->connect()\n");
 		return NULL;
 	}

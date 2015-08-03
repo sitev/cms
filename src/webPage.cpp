@@ -47,6 +47,7 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		this->out(t);
 	}
 	else {
+		printf("WebPage::paint\n");
 		fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
 		printf("fn = %s\n", fn.toString8().c_str());
 		int ret;

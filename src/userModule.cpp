@@ -11,6 +11,7 @@ UserModule::UserModule(SiteManager *manager) : WebModule(manager) {
 }
 
 void UserModule::paint(WebPage *page, HttpRequest &request) {
+	printf("UserModule::paint\n");
 	String cmd = request.header.GET.getValue("cmd");
 	if (cmd == "ajax") 
 		return ajax(page, request);
@@ -78,15 +79,17 @@ void UserModule::sendAccount(WebPage *page, HttpRequest &request) {
 				}
 			}
 		}
-		string s = "Доброго времени суток!\n\nНа сайте " + page->site->host.toString8() +
-			" Вы сделали запрос на получение аккаунта и/или пароля .\n";
-		s += "Если это не так, просто удалите это письмо. \n\n";
-		s += "Ваш аккаунт: " + email.toString8() + "\n";
-		s += "Ваш пароль: " + password.toString8() + "\n\n";
-		s += "Для активизации Вашего аккаунта и/или пароля необходимо перейти по следующей ссылке:\n";
-		s += "http://" + page->site->host.toString8() + "/user/activate/" + guid.toString8() + "\n\n";
+		WebTemplate * tplEmail = new WebTemplate();
+		String userTpl = "email_tpl.html";
+		if (tplEmail->open(manager->modulePath + "/user/" + userTpl)) {
+			tplEmail->out("host", page->site->host);
+			tplEmail->out("email", email);
+			tplEmail->out("password", password);
+			tplEmail->out("guid", guid);
+			tplEmail->exec();
+			sendMail(email, "no-reply@" + page->site->host, page->site->host + ": РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ Р°РєРєР°СѓРЅС‚Р°", tplEmail->html);
+		}
 
-		sendMail_s(email.toString8(), "noreply@" + page->site->host.toString8(), page->site->host.toString8() + ": подтверждение аккаунта", s);
 		WebTemplate * tpl = new WebTemplate();
 		if (tpl->open(manager->modulePath + "/user/loginSendAccount_tpl.html")) {
 			tpl->out("out", email);
@@ -100,12 +103,17 @@ void UserModule::activate(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 	String p3 = request.header.GET.getValue("p3");
 	String sql = "update users set active = '1', password=newPassword where uuid = '" + p3 + "'";
-	page->out("out", "<h2>Активизация аккаунта</h2>");
+	WebTemplate * tpl = new WebTemplate();
+	String activateTpl = "";
 	if (query->exec(sql)) {
-		page->out("out", "Ваш аккаунт был успешно активизирован...<br>\nВойдите на сайт в боковой панели сайта...");
+		activateTpl = "activateSuccess_tpl.html";
 	}
 	else {
-		page->out("out", "Возникла ошибка при активизации аккаунта...");
+		activateTpl = "activateFail_tpl.html";
+	}
+	if (tpl->open(manager->modulePath + "/user/" + activateTpl)) {
+		tpl->exec();
+		page->out("content", tpl->html);
 	}
 }
 void UserModule::changePassword(WebPage *page, HttpRequest &request) {
@@ -124,8 +132,8 @@ void UserModule::changePassword(WebPage *page, HttpRequest &request) {
 		}
 		else {
 			if (tpl->open(manager->documentRoot + "/tpl/message_tpl.html")) {
-				tpl->out("caption", "Смена пароля");
-				tpl->out("error", "Для смены пароля войдите на сайт под своим логином и старым паролем");
+				tpl->out("caption", "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
+				tpl->out("error", "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 				tpl->exec();
 				page->out("out", tpl->html);
 			}
@@ -133,7 +141,7 @@ void UserModule::changePassword(WebPage *page, HttpRequest &request) {
 	}
 	else if (p3 == "done") {
 		if (tpl->open(manager->documentRoot + "/tpl/message_tpl.html")) {
-			tpl->out("caption", "Смена пароля");
+			tpl->out("caption", "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
 
 			String message, error;
 
@@ -151,21 +159,21 @@ void UserModule::changePassword(WebPage *page, HttpRequest &request) {
 								if (newPassword == repeatPassword) {
 									String sql = "update users set password='" + newPassword + "' where id='" + userId + "'";
 									if (query->exec(sql)) {
-										message = "Пароль был успешно изменён!";
+										message = "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ!";
 									}
 									else {
-										error = "Ошибка базы данных";
+										error = "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ";
 									}
 								}
-								else error = "Пароли не совпадают";
+								else error = "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
 							}
 						}
-						else error = "Старый пароль введён не корректно";
+						else error = "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
 					}
 				}
 			}
 			else {
-				error = "Для смены пароля войдите на сайт под своим логином и старым паролем";
+				error = "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
 			}
 			tpl->out("message", message);
 			tpl->out("error", error);
@@ -255,7 +263,7 @@ void UserModule::ajax(WebPage *page, HttpRequest &request) {
 
 						}
 						else {
-							page->tplIndex->out("out", "<error>Вход временно заблокирован - сайт в режиме разработки...</error>");
+							page->tplIndex->out("out", "<error>пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ...</error>");
 						}
 					}
 				}
