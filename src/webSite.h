@@ -12,8 +12,7 @@ public:
 	SiteManager *manager;
 	String host;
 	int tplId;
-	String login;
-	int userId;
+	WebPage *mainPage;
 
 	map <string, WebPage*> pages;
 	WebSite(SiteManager *manager, string host);

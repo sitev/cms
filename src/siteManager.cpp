@@ -87,7 +87,7 @@ MySQL* SiteManager::newQuery() {
 		printf("initSites: !query->init()\n");
 		return NULL;
 	}
-	if (!query->connect("127.0.0.1", "root", "123", "sitev")) {
+	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) {
 		printf("initSites: !query->connect()\n");
 		return NULL;
 	}
@@ -111,16 +111,18 @@ void SiteManager::initSites() {
 				WebSite *ws = new WebSite(this, url);
 				sites.insert(std::pair<string, WebSite*>(url, ws));
 
-				sql = "select p.url, p.id, p.moduleId, m.name from pages p, modules m where p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
+				sql = "select p.url, p.isMainPage, p.id, p.moduleId, m.name from pages p, modules m where p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
 				if (queryPages->exec(sql)) {
 					if (queryPages->storeResult()) {
 						int count = queryPages->getRowCount();
 						for (int i = 0; i < count; i++) {
 							string url = queryPages->getFieldValue(i, "url").toString8();
+							int isMainPage = queryPages->getFieldValue(i, "isMainPage").toInt();
 							int pageId = queryPages->getFieldValue(i, "id").toInt();
 							int moduleId = queryPages->getFieldValue(i, "moduleId").toInt();
 							WebModule *wm = modules[moduleId];
 							WebPage *wp = new WebPage(ws, url, pageId, wm);
+							if (isMainPage == 1) ws->mainPage = wp;
 							ws->pages.insert(std::pair<string, WebPage*>(url, wp));
 						}
 					}
@@ -131,36 +133,31 @@ void SiteManager::initSites() {
 }
 
 void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
-	printf("paintPage\n");
 	string host = request.header.getValue("Host").toString8();
-
 	printf("host = %s\n", host.c_str());
-
 	if (host == "127.0.0.1:8080") host = "sitev.ru";
+
 	string page = "";
 	int count = request.header.GET.getCount();
-
 	if (count > 0) {
 		page = request.header.GET.getValue_s("p1");
 	}
-
 	printf("page = %s\n", page.c_str());
 
-	printf("1\n");
 	WebSite *ws = sites[host];
-	printf("2\n");
 	if (ws != NULL) {
-		printf("3\n");
+		if (page == ws->mainPage->page && count == 1) {
+			return;
+		}
+		if (page == "") {
+			page = ws->mainPage->page;
+		}
+		
 		WebPage *wp = ws->pages[page];
-		printf("4\n");
 		if (wp != NULL) {
-			printf("5\n");
 			wp->paint(request, response);
-			printf("6\n");
 		}
 	}
-
-	printf("paintPage end \n");
 }
 
 String SiteManager::generateUserPassword() {

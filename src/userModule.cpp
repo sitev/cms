@@ -16,9 +16,6 @@ void UserModule::paint(WebPage *page, HttpRequest &request) {
 	if (cmd == "ajax") 
 		return ajax(page, request);
 
-	if (page->site->login == "") page->out("login", "Login");
-	else page->out("login", page->site->login);
-
 	String p2 = request.header.GET.getValue("p2");
 
 	if (p2 == "") paintAbout(page, request);
@@ -31,12 +28,16 @@ void UserModule::paint(WebPage *page, HttpRequest &request) {
 }
 
 void UserModule::paintAbout(WebPage *page, HttpRequest &request) {
-	WebTemplate * tpl = new WebTemplate();
+	WebTemplate *tpl = new WebTemplate();
 	String userTpl = "user_tpl.html";
-	if (page->site->login == "") userTpl = "userNoEnter_tpl.html";
 
-	if (tpl->open(manager->modulePath + "/user/" + userTpl)) {
-		tpl->out("email", page->site->login);
+	String uuid = request.header.COOKIE.getValue("uuid");
+	String login = page->site->manager->getLogin(uuid);
+	if (login == "") userTpl = "userNoEnter_tpl.html";
+
+	String tplPath = manager->modulePath + "/user/" + userTpl;
+	if (tpl->open(tplPath)) {
+		tpl->out("email", login);
 		tpl->out("money", "0");
 		tpl->exec();
 		page->out("content", tpl->html);
