@@ -56,6 +56,9 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 			fn = site->manager->documentRoot + "/common/index_tpl.html";
 		}
 
+		tplIndex->clearTag("title");
+		tplIndex->clearTag("keywords");
+		tplIndex->clearTag("description");
 		tplIndex->clearTag("content");
 		this->module->paint(this, request);
 

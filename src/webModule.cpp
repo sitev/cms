@@ -94,16 +94,9 @@ NewsModule::NewsModule(SiteManager *manager) : PostModule(manager) {
 	setOptionsFromDB(2);
 }
 void NewsModule::paint(WebPage *page, HttpRequest &request) {
-	printf("news 1\n");
 	String newsId = request.header.GET.getValue("p2");
-
-	printf("news 2\n");
-
 	if (newsId == "") paintNews(page);
-	return paintNewsItemView(page, newsId);
-
-	printf("news 3\n");
-
+	else paintNewsItemView(page, newsId);
 }
 
 void NewsModule::paintNews(WebPage *page) {
@@ -171,6 +164,9 @@ void NewsModule::paintNewsItemView(WebPage *page, String newsId) {
 					tpl->out("name", name);
 					tpl->out("text", text);
 					tpl->exec();
+					page->out("title", name);
+					page->out("keywords", name);
+					page->out("description", name);
 					page->out("content", tpl->html);
 				}
 			}
