@@ -108,37 +108,4 @@ void WebPage::out(String tag, String s) {
 	tplIndex->out(tag, s);
 }
 
-String WebPage::htmlEntities(String s) {
-	String r = "";
-	int len = s.getLength();
-	for (int i = 0; i < len; i++) {
-		char32_t ch = s.getChar(i).get();
-		switch (ch) {
-		case '&': {
-			r = r + "'&amp'";
-			break;
-		}
-		case '<': {
-			r = r + "'&lt'";
-			break;
-		}
-		case '>': {
-			r = r + "'&gt'";
-			break;
-		}
-		case '"': {
-			r = r + "'&guot'";
-			break;
-		}
-		case '\'': {
-			r = r + "'&apos'";
-			break;
-		}
-		default:
-			r = r + ch;
-		}
-	}
-	return r;
-}
-
 }
