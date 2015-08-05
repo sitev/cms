@@ -144,7 +144,7 @@ void NewsModule::paintNews(WebPage *page) {
 }
 
 void NewsModule::paintNewsItemView(WebPage *page, String newsId) {
-	String sql = "select dt, name, about, text from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
+	String sql = "select dt, name, about, text, n.num from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
 		(String)moduleId + "' and n.num='" + newsId + "' order by n.num desc";
 	MySQL *query = manager->newQuery();
 
@@ -159,10 +159,12 @@ void NewsModule::paintNewsItemView(WebPage *page, String newsId) {
 					String name = query->getFieldValue(0, "name");
 					String about = query->getFieldValue(0, "about");
 					String text = query->getFieldValue(0, "text");
+					String num = query->getFieldValue(0, "num");
 
 					tpl->out("dt", dt);
 					tpl->out("name", name);
 					tpl->out("text", text);
+					tpl->out("itemId", num);
 					tpl->exec();
 					page->out("title", name);
 					page->out("keywords", name);
