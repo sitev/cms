@@ -41,7 +41,9 @@ public:
 	NewsModule(SiteManager *manager);
 	virtual void paint(WebPage *page, HttpRequest &request);
 	virtual void paintNews(WebPage *page);
-	virtual void paintNewsItemView(WebPage *page, String newsId);
+	virtual void paintNewsItemView(WebPage *page, HttpRequest &request, String num);
+	virtual void paintTags(WebPage *page, String num, WebTemplate *tpl);
+	virtual void ajax(WebPage *page, HttpRequest &request);
 };
 
 class BlogModule : public NewsModule {

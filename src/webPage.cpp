@@ -32,6 +32,10 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		this->module->paint(this, request);
 		count = tplIndex->lstTag.getCount();
 
+		String uuid = request.header.COOKIE.getValue("uuid");
+		if (uuid.getLength() < 10)
+			uuid = generateUUID();
+
 		//String t = "<note><result>1</result></note>";
 		
 		File *f = new File(fn, "rb");
@@ -63,7 +67,8 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		this->module->paint(this, request);
 
 		String uuid = request.header.COOKIE.getValue("uuid");
-		if (uuid.getLength() < 10) uuid = generateUUID();
+		if (uuid.getLength() < 10) 
+			uuid = generateUUID();
 
 
 		String login = site->manager->getLogin(uuid);

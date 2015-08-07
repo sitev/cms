@@ -94,9 +94,12 @@ NewsModule::NewsModule(SiteManager *manager) : PostModule(manager) {
 	setOptionsFromDB(2);
 }
 void NewsModule::paint(WebPage *page, HttpRequest &request) {
-	String newsId = request.header.GET.getValue("p2");
-	if (newsId == "") paintNews(page);
-	else paintNewsItemView(page, newsId);
+	String cmd = request.header.GET.getValue("cmd");
+	if (cmd == "ajax")
+		return ajax(page, request);
+	String num = request.header.GET.getValue("p2");
+	if (num == "") paintNews(page);
+	else paintNewsItemView(page, request, num);
 }
 
 void NewsModule::paintNews(WebPage *page) {
@@ -130,7 +133,10 @@ void NewsModule::paintNews(WebPage *page) {
 						tpl1->out("about", about);
 						tpl1->out("text", text);
 
+						paintTags(page, num, tpl1);
+
 						tpl1->exec();
+
 						tpl->out("out", tpl1->html);
 					}
 				}
@@ -143,11 +149,13 @@ void NewsModule::paintNews(WebPage *page) {
 	}
 }
 
-void NewsModule::paintNewsItemView(WebPage *page, String newsId) {
-	String sql = "select dt, name, about, text, n.num from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
-		(String)moduleId + "' and n.num='" + newsId + "' order by n.num desc";
+void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String num) {
 	MySQL *query = manager->newQuery();
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = manager->getUserId(uuid);
 
+	String sql = "select dt, name, about, text, n.num, n.id newsId from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
+		(String)moduleId + "' and n.num='" + num + "' order by n.num desc";
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
@@ -159,19 +167,107 @@ void NewsModule::paintNewsItemView(WebPage *page, String newsId) {
 					String name = query->getFieldValue(0, "name");
 					String about = query->getFieldValue(0, "about");
 					String text = query->getFieldValue(0, "text");
-					String num = query->getFieldValue(0, "num");
+					//String num = query->getFieldValue(0, "num");
+					int newsId = query->getFieldValue(0, "newsId").toInt();
 
 					tpl->out("dt", dt);
 					tpl->out("name", name);
 					tpl->out("text", text);
 					tpl->out("itemId", num);
+
+					paintTags(page, num, tpl);
+
+					sql = "select c.dt, c.comment, u.login from comments c, users u where u.id=c.userId and newsId='2' order by c.id";
+					if (query->exec(sql)) {
+						if (query->storeResult()) {
+							int count = query->getRowCount();
+							for (int i = 0; i < count; i++) {
+								String dt = query->getFieldValue(i, "dt");
+								String comment = query->getFieldValue(i, "comment");
+								String login = query->getFieldValue(i, "login");
+								WebTemplate * tplCommentItem = new WebTemplate();
+								if (tplCommentItem->open(manager->modulePath + "/" + url + "/commentItem_tpl.html")) {
+									tplCommentItem->out("login", login);
+									tplCommentItem->out("dt", dt);
+									tplCommentItem->out("comment", comment);
+									tplCommentItem->exec();
+									tpl->out("comments", tplCommentItem->html);
+								}
+
+							}
+						}
+					}
+					WebTemplate * tplSendComment = new WebTemplate();
+					if (userId != 0) {
+						if (tplSendComment->open(manager->modulePath + "/" + url + "/sendComment_tpl.html")) {
+							tplSendComment->out("newsId", newsId);
+						}
+					}
+					else {
+						if (tplSendComment->open(manager->modulePath + "/" + url + "/sendCommentNotEnter_tpl.html")) {
+							tplSendComment->out("newsId", newsId);
+						}
+					}
+					tplSendComment->exec();
+					tpl->out("sendComment", tplSendComment->html);
 					tpl->exec();
+
 					page->out("title", name);
 					page->out("keywords", name);
 					page->out("description", name);
 					page->out("content", tpl->html);
 				}
 			}
+		}
+	}
+}
+
+void NewsModule::paintTags(WebPage *page, String num, WebTemplate *tpl) {
+	MySQL *query = manager->newQuery();
+	String sql = "select tag1, tag2, tag3, tag4, tag5 from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
+		(String)moduleId + "' and n.num='" + num + "' order by n.num desc";
+	if (query->exec(sql)) {
+		if (query->storeResult()) {
+			int count = query->getRowCount();
+			if (count > 0) {
+				for (int i = 1; i <= 5; i++) {
+					String tag = query->getFieldValue(0, "tag" + (String)i);
+
+					if (tag != "") {
+						WebTemplate * tplTag = new WebTemplate();
+						if (tplTag->open(manager->modulePath + "/" + url + "/tag_tpl.html")) {
+							tplTag->out("name", tag);
+							tplTag->exec();
+							tpl->out("tags", tplTag->html);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void NewsModule::ajax(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+	String obj = request.header.GET.getValue("p1");
+	String func = request.header.GET.getValue("p2");
+	String uuid = request.header.COOKIE.getValue("uuid");
+
+	if (obj == "post") {
+		if (func == "sendComment") {
+			String comment = request.header.POST.getValue("comment");
+			int newsId = request.header.POST.getValue("newsId").toInt();
+			int userId = manager->getUserId(uuid);
+			String result = "";
+
+			String sql = "insert into comments (userId, newsId, comment) values ('" + (String)userId + "', '" + (String)newsId + "', '" + comment + "')";
+			if (query->exec(sql)) {
+				result = "1";
+			}
+
+			page->tplIndex->out("out", "<note>\n");
+			page->tplIndex->out("out", "<result>" + result + "</result>\n");
+			page->tplIndex->out("out", "</note>\n");
 		}
 	}
 }
