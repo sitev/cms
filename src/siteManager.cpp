@@ -122,7 +122,8 @@ void SiteManager::initSites() {
 							int moduleId = queryPages->getFieldValue(i, "moduleId").toInt();
 							WebModule *wm = modules[moduleId];
 							WebPage *wp = new WebPage(ws, url, pageId, wm);
-							if (isMainPage == 1) ws->mainPage = wp;
+							if (isMainPage == 1) 
+								ws->mainPage = wp;
 							ws->pages.insert(std::pair<string, WebPage*>(url, wp));
 						}
 					}
