@@ -24,7 +24,7 @@ WebTemplate::WebTemplate() {
 bool WebTemplate::open(String url) {
 	File *f = new File(url, "rb");
 	if (!f->isOpen()) return false;
-	f->readAll(html);
+	f->readAll(src);
 	delete f;
 
 	return true;
@@ -55,6 +55,11 @@ void WebTemplate::clearTag(String tag) {
 		}
 	}
 }
+
+void WebTemplate::clearAllTags() {
+	lstTag.clear();
+}
+
 void WebTemplate::exec(String source, String &target) {
 	String s = source;
 	target = "";
@@ -86,7 +91,7 @@ void WebTemplate::exec(String source, String &target) {
 }
 
 void WebTemplate::exec() {
-	exec(html, html);
+	exec(src, html);
 }
 
 

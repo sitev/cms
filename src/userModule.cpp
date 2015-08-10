@@ -63,6 +63,7 @@ void UserModule::sendAccount(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 	String guid = generateUUID();
 	String email = request.header.POST.getValue("email");
+	String login = request.header.POST.getValue("login");
 	if (email != "") {
 		String password = manager->generateUserPassword();
 		String sql = "select * from users where email='" + email + "'";
@@ -75,7 +76,7 @@ void UserModule::sendAccount(WebPage *page, HttpRequest &request) {
 					if (query->exec(sql)) {}
 				}
 				else {
-					sql = "insert into users (email, newPassword, uuid) values('" + email + "', '" + password + "', '" + guid + "')";
+					sql = "insert into users (email, login, newPassword, uuid) values('" + email + "', '" + login + "', '" + password + "', '" + guid + "')";
 					if (query->exec(sql)) {}
 				}
 			}

@@ -104,49 +104,72 @@ void NewsModule::paint(WebPage *page, HttpRequest &request) {
 
 void NewsModule::paintNews(WebPage *page) {
 	WebTemplate *tpl = new WebTemplate();
-	if (tpl->open(manager->modulePath + "/" + url + "/index_tpl.html")) {
-		String sql = "select * from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" + (String)moduleId + "' order by dt desc";
-		//page->out("out", sql);
-		MySQL *query = manager->newQuery();
+	if (!tpl->open(manager->modulePath + "/" + url + "/index_tpl.html")) return;
 
-		if (query->exec(sql)) {
-			if (query->storeResult()) {
-				int count = query->getRowCount();
-				for (int i = 0; i < count; i++) {
-					String id = query->getFieldValue(i, "id");
-					String dt = query->getFieldValue(i, "dt");
-					dt = dtRus(dt, 0);
-					String name = query->getFieldValue(i, "name");
-					String about = query->getFieldValue(i, "about");
-					String text = query->getFieldValue(i, "text");
-					int num = query->getFieldValue(i, "num").toInt();
+	WebTemplate *tplItem = new WebTemplate();
+	if (!tplItem->open(manager->modulePath + "/" + url + "/item_tpl.html")) return;
 
-					WebTemplate *tpl1 = new WebTemplate();
-					String fn;
-					if (i + 1 != count) fn = manager->modulePath + "/" + url + "/item_tpl.html";
-					else fn = manager->modulePath + "/" + url + "/itemLast_tpl.html";
-					if (tpl1->open(fn)) {
-						tpl1->out("page", page->page);
-						tpl1->out("num", num);
-						tpl1->out("dt", dt);
-						tpl1->out("name", name);
-						tpl1->out("about", about);
-						tpl1->out("text", text);
+	WebTemplate *tplLast = new WebTemplate();
+	if (!tplLast->open(manager->modulePath + "/" + url + "/itemLast_tpl.html")) return;
 
-						paintTags(page, num, tpl1);
+	WebTemplate *tplTag = new WebTemplate();
+	if (!tplTag->open(manager->modulePath + "/" + url + "/tag_tpl.html")) return;
 
-						tpl1->exec();
+	String sql = "select * from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" + (String)moduleId + "' order by dt desc";
+	//page->out("out", sql);
+	MySQL *query = manager->newQuery();
 
-						tpl->out("out", tpl1->html);
-					}
-				}
+	if (query->exec(sql)) {
+		if (query->storeResult()) {
+			int count = query->getRowCount();
+			for (int i = 0; i < count; i++) {
+				String id = query->getFieldValue(i, "id");
+				String dt = query->getFieldValue(i, "dt");
+				dt = dtRus(dt, 0);
+				String name = query->getFieldValue(i, "name");
+				String about = query->getFieldValue(i, "about");
+				String text = query->getFieldValue(i, "text");
+				int num = query->getFieldValue(i, "num").toInt();
+
+				String tag1 = query->getFieldValue(i, "tag1");
+				String tag2 = query->getFieldValue(i, "tag2");
+				String tag3 = query->getFieldValue(i, "tag3");
+				String tag4 = query->getFieldValue(i, "tag4");
+				String tag5 = query->getFieldValue(i, "tag5");
+
+				WebTemplate *tpli = tplItem;
+				if (i + 1 == count) tpli = tplLast;
+				tpli->clearAllTags();
+
+				tpli->out("page", page->page);
+				tpli->out("num", num);
+				tpli->out("dt", dt);
+				tpli->out("name", name);
+				tpli->out("about", about);
+				tpli->out("text", text);
+
+				tplTag->clearAllTags();
+				tplTag->out("tag1", tag1);
+				tplTag->out("tag2", tag2);
+				tplTag->out("tag3", tag3);
+				tplTag->out("tag4", tag4);
+				tplTag->out("tag5", tag5);
+				tplTag->exec();
+
+				tpli->out("tags", tplTag->html);
+
+//				paintTags(page, num, tpli);
+
+				tpli->exec();
+
+				tpl->out("out", tpli->html);
 			}
 		}
-
-		tpl->out("caption", caption);
-		tpl->exec();
-		page->out("content", tpl->html);
 	}
+
+	tpl->out("caption", caption);
+	tpl->exec();
+	page->out("content", tpl->html);
 }
 
 void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String num) {
@@ -177,7 +200,7 @@ void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String n
 
 					paintTags(page, num, tpl);
 
-					sql = "select c.dt, c.comment, u.login from comments c, users u where u.id=c.userId and newsId='2' order by c.id";
+					sql = "select c.dt, c.comment, u.login from comments c, users u where u.id=c.userId and newsId='" + (String)newsId + "' order by c.id";
 					if (query->exec(sql)) {
 						if (query->storeResult()) {
 							int count = query->getRowCount();
@@ -223,19 +246,19 @@ void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String n
 }
 
 void NewsModule::paintTags(WebPage *page, String num, WebTemplate *tpl) {
-	MySQL *query = manager->newQuery();
-	String sql = "select tag1, tag2, tag3, tag4, tag5 from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
-		(String)moduleId + "' and n.num='" + num + "' order by n.num desc";
-	if (query->exec(sql)) {
-		if (query->storeResult()) {
-			int count = query->getRowCount();
-			if (count > 0) {
-				for (int i = 1; i <= 5; i++) {
-					String tag = query->getFieldValue(0, "tag" + (String)i);
+	WebTemplate *tplTag = new WebTemplate();
+	if (tplTag->open(manager->modulePath + "/" + url + "/tag_tpl.html")) {
+		MySQL *query = manager->newQuery();
+		String sql = "select tag1, tag2, tag3, tag4, tag5 from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" +
+			(String)moduleId + "' and n.num='" + num + "' order by n.num desc";
+		if (query->exec(sql)) {
+			if (query->storeResult()) {
+				int count = query->getRowCount();
+				if (count > 0) {
+					for (int i = 1; i <= 5; i++) {
+						String tag = query->getFieldValue(0, "tag" + (String)i);
 
-					if (tag != "") {
-						WebTemplate * tplTag = new WebTemplate();
-						if (tplTag->open(manager->modulePath + "/" + url + "/tag_tpl.html")) {
+						if (tag != "") {
 							tplTag->out("name", tag);
 							tplTag->exec();
 							tpl->out("tags", tplTag->html);
