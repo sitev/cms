@@ -93,16 +93,18 @@ PostModule::PostModule(SiteManager *manager) : WebModule(manager) {
 NewsModule::NewsModule(SiteManager *manager) : PostModule(manager) {
 	setOptionsFromDB(2);
 }
+
 void NewsModule::paint(WebPage *page, HttpRequest &request) {
 	String cmd = request.header.GET.getValue("cmd");
 	if (cmd == "ajax")
 		return ajax(page, request);
-	String num = request.header.GET.getValue("p2");
-	if (num == "") paintNews(page);
-	else paintNewsItemView(page, request, num);
+	String p2 = request.header.GET.getValue("p2");
+	if (p2 == "") paintNews(page, request);
+	else if (p2 == "add") paintAddNews(page, request);
+	else paintNewsItemView(page, request, p2);
 }
 
-void NewsModule::paintNews(WebPage *page) {
+void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 	WebTemplate *tpl = new WebTemplate();
 	if (!tpl->open(manager->modulePath + "/" + url + "/index_tpl.html")) return;
 
@@ -115,10 +117,17 @@ void NewsModule::paintNews(WebPage *page) {
 	WebTemplate *tplTag = new WebTemplate();
 	if (!tplTag->open(manager->modulePath + "/" + url + "/tag_tpl.html")) return;
 
-	String sql = "select * from dataNews n, data d where d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" + (String)moduleId + "' order by dt desc";
-	//page->out("out", sql);
 	MySQL *query = manager->newQuery();
 
+	String sql = "select count(*) cnt from dataNews n, data d where not isnull(num) and d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" + (String)moduleId + "' order by dt desc";
+	int newsCount = 0;
+	if (query->active(sql) > 0) {
+		newsCount = query->getFieldValue(0, "cnt").toInt();
+	}
+
+	int p = request.header.GET.getValue("p").toInt();
+	sql = "select * from dataNews n, data d where not isnull(num) and d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" + (String)moduleId + 
+		"' order by dt desc limit " + (String)(p * 10) + ", 10";
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
@@ -157,15 +166,41 @@ void NewsModule::paintNews(WebPage *page) {
 				tplTag->exec();
 
 				tpli->out("tags", tplTag->html);
-
-//				paintTags(page, num, tpli);
-
 				tpli->exec();
 
 				tpl->out("out", tpli->html);
 			}
 		}
 	}
+
+	WebTemplate *tplPag = new WebTemplate();
+	if (!tplPag->open(manager->modulePath + "/" + url + "/pagination_tpl.html")) return;
+
+	int pageCount = newsCount / 10;
+	if (newsCount % 10 == 0) pageCount++;
+	for (int i = 0; i < pageCount; i++) {
+		if (i == 0)	tplPag->out("out", "<li><a href=\"/\">" + (String)(i + 1)+ "</a></li>");
+		else tplPag->out("out", "<li><a href=\"/post?p=" + (String)i + "\">" + (String)(i + 1) + "</a></li>");
+
+		if (i + 1 == pageCount) tplPag->out("next", "/post?p=" + (String)i);
+	}
+	tplPag->exec();
+	tpl->out("out", tplPag->html);
+
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = manager->getUserId(uuid);
+
+	WebTemplate *tplWrite = new WebTemplate();
+	if (userId != 0) {
+		if (!tplWrite->open(manager->modulePath + "/" + url + "/addPostButton_tpl.html")) return;
+	}
+	else {
+		if (!tplWrite->open(manager->modulePath + "/" + url + "/addPostButtonNotEnter_tpl.html")) return;
+	}
+
+	tplWrite->exec();
+	tpl->out("out", tplWrite->html);
+
 
 	tpl->out("caption", caption);
 	tpl->exec();
@@ -270,6 +305,15 @@ void NewsModule::paintTags(WebPage *page, String num, WebTemplate *tpl) {
 	}
 }
 
+void NewsModule::paintAddNews(WebPage *page, HttpRequest &request) {
+	WebTemplate *tpl = new WebTemplate();
+	if (tpl->open(manager->modulePath + "/" + url + "/addPost_tpl.html")) {
+	}
+
+	tpl->exec();
+	page->out("content", tpl->html);
+}
+
 void NewsModule::ajax(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 	String obj = request.header.GET.getValue("p1");
@@ -290,6 +334,27 @@ void NewsModule::ajax(WebPage *page, HttpRequest &request) {
 
 			page->tplIndex->out("out", "<note>\n");
 			page->tplIndex->out("out", "<result>" + result + "</result>\n");
+			page->tplIndex->out("out", "</note>\n");
+		}
+		if (func == "sendPost") {
+			String name = request.header.POST.getValue("name");
+			String text = request.header.POST.getValue("content");
+			text = request.header.htmlEntitiesDecode(text.toString8());
+			int userId = manager->getUserId(uuid);
+			String result = "";
+
+			String sql = "insert into dataNews (name, text) values ('" + name + "', '" + text + "')";
+			if (query->exec(sql)) {
+				sql = "insert into data (pageId, dataId, moduleId, userId) values('" + (String)page->pageId + "', LAST_INSERT_ID(), '3', '" + (String)userId + "')";
+				if (query->exec(sql)) {
+					result = "1";
+				}
+				else result = "3";
+			}
+			else result = "2";
+			page->tplIndex->out("out", "<note>\n");
+			page->tplIndex->out("out", "<result>" + result + "</result>\n");
+			page->tplIndex->out("out", "<sql>" + sql + "</sql>\n");
 			page->tplIndex->out("out", "</note>\n");
 		}
 	}

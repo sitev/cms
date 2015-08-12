@@ -40,9 +40,10 @@ protected:
 public:
 	NewsModule(SiteManager *manager);
 	virtual void paint(WebPage *page, HttpRequest &request);
-	virtual void paintNews(WebPage *page);
+	virtual void paintNews(WebPage *page, HttpRequest &request);
 	virtual void paintNewsItemView(WebPage *page, HttpRequest &request, String num);
 	virtual void paintTags(WebPage *page, String num, WebTemplate *tpl);
+	virtual void paintAddNews(WebPage *page, HttpRequest &request);
 	virtual void ajax(WebPage *page, HttpRequest &request);
 };
 
