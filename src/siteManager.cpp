@@ -147,16 +147,18 @@ void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 
 	WebSite *ws = sites[host];
 	if (ws != NULL) {
-		if (page == ws->mainPage->page && count == 1) {
-			return;
-		}
-		if (page == "") {
-			page = ws->mainPage->page;
-		}
-		
-		WebPage *wp = ws->pages[page];
-		if (wp != NULL) {
-			wp->paint(request, response);
+		if (ws->mainPage != NULL) {
+			if (page == ws->mainPage->page && count == 1) {
+				return;
+			}
+			if (page == "") {
+				page = ws->mainPage->page;
+			}
+
+			WebPage *wp = ws->pages[page];
+			if (wp != NULL) {
+				wp->paint(request, response);
+			}
 		}
 	}
 }

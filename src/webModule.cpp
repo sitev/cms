@@ -173,19 +173,21 @@ void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 		}
 	}
 
-	WebTemplate *tplPag = new WebTemplate();
-	if (!tplPag->open(manager->modulePath + "/" + url + "/pagination_tpl.html")) return;
+	if (newsCount != 0) {
+		WebTemplate *tplPag = new WebTemplate();
+		if (!tplPag->open(manager->modulePath + "/" + url + "/pagination_tpl.html")) return;
 
-	int pageCount = newsCount / 10;
-	if (newsCount % 10 == 0) pageCount++;
-	for (int i = 0; i < pageCount; i++) {
-		if (i == 0)	tplPag->out("out", "<li><a href=\"/\">" + (String)(i + 1)+ "</a></li>");
-		else tplPag->out("out", "<li><a href=\"/post?p=" + (String)i + "\">" + (String)(i + 1) + "</a></li>");
+		int pageCount = newsCount / 10;
+		if (newsCount % 10 == 0) pageCount++;
+		for (int i = 0; i < pageCount; i++) {
+			if (i == 0)	tplPag->out("out", "<li><a href=\"/\">" + (String)(i + 1) + "</a></li>");
+			else tplPag->out("out", "<li><a href=\"/post?p=" + (String)i + "\">" + (String)(i + 1) + "</a></li>");
 
-		if (i + 1 == pageCount) tplPag->out("next", "/post?p=" + (String)i);
+			if (i + 1 == pageCount) tplPag->out("next", "/post?p=" + (String)i);
+		}
+		tplPag->exec();
+		tpl->out("out", tplPag->html);
 	}
-	tplPag->exec();
-	tpl->out("out", tplPag->html);
 
 	String uuid = request.header.COOKIE.getValue("uuid");
 	int userId = manager->getUserId(uuid);
