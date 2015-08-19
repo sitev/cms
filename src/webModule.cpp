@@ -151,7 +151,7 @@ void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 				tpli->clearAllTags();
 
 				tpli->out("page", page->page);
-				tpli->out("num", num);
+				tpli->out("itemId", num);
 				tpli->out("dt", dt);
 				tpli->out("name", name);
 				tpli->out("about", about);
