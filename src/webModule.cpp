@@ -234,7 +234,8 @@ void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String n
 					tpl->out("dt", dt);
 					tpl->out("name", name);
 					tpl->out("text", text);
-					tpl->out("itemId", num);
+					tpl->out("num", num);
+					tpl->out("itemId", newsId);
 
 					paintTags(page, num, tpl);
 
