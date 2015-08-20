@@ -179,7 +179,7 @@ void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 		if (!tplPag->open(manager->modulePath + "/" + url + "/pagination_tpl.html")) return;
 
 		int pageCount = newsCount / 10;
-		if (newsCount % 10 == 0) pageCount++;
+		if (newsCount % 10 != 0) pageCount++;
 		for (int i = 0; i < pageCount; i++) {
 			if (i == 0)	tplPag->out("out", "<li><a href=\"/\">" + (String)(i + 1) + "</a></li>");
 			else tplPag->out("out", "<li><a href=\"/post?p=" + (String)i + "\">" + (String)(i + 1) + "</a></li>");

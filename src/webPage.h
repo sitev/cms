@@ -19,6 +19,7 @@ public:
 	WebTemplate *tplIndex;
 	WebPage(WebSite *site, string page, int pageId, WebModule *module = NULL);
 	virtual void paint(HttpRequest &request, HttpResponse &response);
+
 	virtual void out(String s);
 	virtual void out(String tag, String s);
 };

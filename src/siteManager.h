@@ -21,7 +21,8 @@ class SiteManager : public WebServer {
 public:
 	map <int, WebModule*> modules;
 	map <string, WebSite*> sites;
-	String documentRoot, modulePath;
+	WidgetManager widgetManager;
+	String documentRoot, modulePath, widgetPath;
 
 	SiteManager(int port = 80);
 	virtual void threadFunction(Socket *socket);

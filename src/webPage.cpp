@@ -64,7 +64,11 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		tplIndex->clearTag("keywords");
 		tplIndex->clearTag("description");
 		tplIndex->clearTag("content");
+		tplIndex->clearTag("sidebar");
+		tplIndex->clearTag("sidebar2");
 		this->module->paint(this, request);
+
+		site->manager->widgetManager.paintPageWidgets(this);
 
 		String uuid = request.header.COOKIE.getValue("uuid");
 		if (uuid.getLength() < 10) 
@@ -90,6 +94,7 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		File *f = new File(fn, "rb");
 		String s, t;
 		f->readAll(s);
+
 		tplIndex->exec(s, t);
 
 

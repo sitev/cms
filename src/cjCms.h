@@ -7,4 +7,6 @@
 #include "webModule.h"
 #include "webPage.h"
 #include "webTemplate.h"
+#include "widget.h"
+
 

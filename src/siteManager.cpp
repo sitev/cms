@@ -32,6 +32,7 @@ bool SiteManagerHandler::isPageExist(string host) {
 SiteManager::SiteManager(int port) : WebServer(port) {
 	documentRoot = "/var/www";
 	modulePath = documentRoot + "/modules";
+	widgetPath = documentRoot + "/widgets";
 	printf("\nInit all...\n");
 	initModules();
 	initSites();
@@ -108,7 +109,7 @@ void SiteManager::initSites() {
 			for (int i = 0; i < count; i++) {
 				int siteId = query->getFieldValue(i, "id").toInt();
 				string url = query->getFieldValue(i, "url").toString8();
-				WebSite *ws = new WebSite(this, url);
+				WebSite *ws = new WebSite(this, url, siteId);
 				sites.insert(std::pair<string, WebSite*>(url, ws));
 
 				sql = "select p.url, p.isMainPage, p.id, p.moduleId, m.name from pages p, modules m where p.moduleId = m.id and p.siteId='" + (String)siteId + "'";

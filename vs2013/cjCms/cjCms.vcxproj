@@ -87,6 +87,7 @@
     <ClCompile Include="..\..\src\webPage.cpp" />
     <ClCompile Include="..\..\src\webSite.cpp" />
     <ClCompile Include="..\..\src\webTemplate.cpp" />
+    <ClCompile Include="..\..\src\widget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\cjCms.h" />
@@ -96,6 +97,7 @@
     <ClInclude Include="..\..\src\webPage.h" />
     <ClInclude Include="..\..\src\webSite.h" />
     <ClInclude Include="..\..\src\webTemplate.h" />
+    <ClInclude Include="..\..\src\widget.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
