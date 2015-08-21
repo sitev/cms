@@ -66,6 +66,15 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		tplIndex->clearTag("content");
 		tplIndex->clearTag("sidebar");
 		tplIndex->clearTag("sidebar2");
+		tplIndex->clearTag("caption");
+
+		MySQL *query = site->manager->newQuery();
+		String sql = "select caption from sites where id='" + (String)site->siteId + "'";
+		if (query->active(sql)) {
+			String caption = query->getFieldValue(0, "caption");
+			tplIndex->out("caption", caption);
+		}
+
 		this->module->paint(this, request);
 
 		site->manager->widgetManager.paintPageWidgets(this);
