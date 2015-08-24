@@ -199,7 +199,7 @@ void UserModule::ajax(WebPage *page, HttpRequest &request) {
 			page->tplIndex->out("out", "<note>\n");
 			page->tplIndex->out("out", "<login>" + login + "</login>\n");
 
-			String sql = (String)"select * from users where email='" + login + "' and password='" + password + "'";
+			String sql = (String)"select * from users where (email='" + login + "' or login='" + login + "') and password='" + password + "'";
 			if (query->exec(sql)) {
 				if (query->storeResult()) {
 					int count = query->getRowCount();

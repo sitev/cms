@@ -137,7 +137,7 @@ void SiteManager::initSites() {
 void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 	string host = request.header.getValue("Host").toString8();
 	printf("host = %s\n", host.c_str());
-	if (host == "127.0.0.1:8080") host = "sitev.ru";
+	if (host == "127.0.0.1:8080") host = LOCALHOST;
 
 	string page = "";
 	int count = request.header.GET.getCount();
@@ -182,7 +182,8 @@ String SiteManager::getLogin(String uuid) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
 			if (count == 0) return "";
-			String login = query->getFieldValue(0, "email");
+			String login = query->getFieldValue(0, "login");
+			if (login == "") login = query->getFieldValue(0, "email");
 			return login;
 		}
 	}
