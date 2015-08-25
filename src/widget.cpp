@@ -60,7 +60,7 @@ PostForMoneyWidget::PostForMoneyWidget() {
 
 void PostForMoneyWidget::paint(WebPage *page, String tag) {
 	WebTemplate *tpl = new WebTemplate();
-	if (!tpl->open(page->site->manager->widgetPath + "/PostForMoneyWidget/tpl.html")) return;
+	if (!tpl->open(page->site->manager->widgetPath + "/postForMoneyWidget/tpl.html")) return;
 	tpl->exec();
 
 	page->out(tag, tpl->html);
@@ -72,7 +72,7 @@ FreeReclameWidget::FreeReclameWidget() {
 
 void FreeReclameWidget::paint(WebPage *page, String tag) {
 	WebTemplate *tpl = new WebTemplate();
-	if (!tpl->open(page->site->manager->widgetPath + "/FreeReclameWidget/tpl.html")) return;
+	if (!tpl->open(page->site->manager->widgetPath + "/freeReclameWidget/tpl.html")) return;
 	tpl->exec();
 
 	page->out(tag, tpl->html);
