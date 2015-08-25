@@ -1,6 +1,8 @@
 #pragma once
 
 #include "cj.h"
+#pragma once
+
 #include "cjCms.h"
 
 namespace cj {

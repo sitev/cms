@@ -79,6 +79,8 @@ void SiteManager::initModules() {
 	wm = new UserModule(this);
 	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
 
+	wm = new WebStudioModule(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
 }
 
 MySQL* SiteManager::newQuery() {
