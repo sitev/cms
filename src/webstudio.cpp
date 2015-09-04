@@ -7,7 +7,7 @@ namespace cj {
 //--------------------------------------------------------------------------------------------------
 
 WebStudioModule::WebStudioModule(SiteManager *manager) : WebModule(manager) {
-	setOptionsFromDB(10);
+	setOptionsFromDB(11);
 }
 
 void WebStudioModule::paint(WebPage *page, HttpRequest &request) {

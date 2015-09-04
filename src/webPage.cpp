@@ -80,6 +80,7 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		site->manager->widgetManager.paintPageWidgets(this);
 
 		String uuid = request.header.COOKIE.getValue("uuid");
+		string uuid8 = uuid.toString8();
 		if (uuid.getLength() < 10) 
 			uuid = generateUUID();
 
