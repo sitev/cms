@@ -75,30 +75,33 @@ void BuilderModule::paintModules(WebTemplate *tpl) {
 	delete query;
 }
 
-void BuilderModule::paintPages(WebTemplate *tpl) {
+void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 	MySQL *query = manager->newQuery();
 
-	String sql = "select * from pages where deleted=0 order by id";
+	String sql = "select p.id, p.url, m.name, p.isMainPage, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" + 
+		(String)siteId + "' and deleted=0 order by p.id";
 	int count = query->active(sql);
 	for (int i = 0; i < count; i++) {
 		int pageId = query->getFieldValue(i, "id").toInt();
 		String url = query->getFieldValue(i, "url");
+		String moduleName = query->getFieldValue(i, "name");
 		int isMainPage = query->getFieldValue(i, "isMainPage").toInt();
 		String title = query->getFieldValue(i, "title");
 		String description = query->getFieldValue(i, "description");
 		String keywords = query->getFieldValue(i, "keywords");
 
-		tpl->out("pages", "<tr><td>" + (String)(i + 1) + "</td><td>" + url + "</td><td>" + (String)isMainPage + "</td><td>" + 
-			title + "</td><td>" + description + "</td><td>" + keywords + "</td></tr>");
+		tpl->out("pages", "<tr id='" + (String)pageId + "'><td>" + (String)(i + 1) + "</td><td>" + url + "</td><td>" + moduleName + "</td><td>" + (String)isMainPage + "</td><td>" +
+			title + "</td><td>" + description + "</td><td>" + keywords + "</td><td><a href='#' data-toggle='modal' data-target='#modRemovePage' data-pageid='" + 
+			(String)pageId + "' data-index='" + (String)i + "' data-url='" + url + "' data-title='" + title + "'><i class='glyphicon glyphicon-remove'></i></a></td></tr>");
 	}
 
 	delete query;
 }
 
-void BuilderModule::paintWidgets(WebTemplate *tpl) {
+void BuilderModule::paintWidgets(int siteId, WebTemplate *tpl) {
 	MySQL *query = manager->newQuery();
 
-	String sql = "select w.id, ws.tag, w.name from widget_site ws, widgets w where ws.widgetId=w.id and siteId=1 order by ws.id";
+	String sql = "select w.id, ws.tag, w.name from widget_site ws, widgets w where ws.widgetId=w.id and siteId='" + (String)siteId + "' order by ws.id";
 	int count = query->active(sql);
 	for (int i = 0; i < count; i++) {
 		int widgetId = query->getFieldValue(i, "id").toInt();
@@ -133,10 +136,11 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 	String tplName = "edit_tpl.html";
 	if (tpl->open(manager->modulePath + "/builder/" + tplName)) {
 		paintModules(tpl);
-		paintPages(tpl);
-		paintWidgets(tpl);
+		int siteId = request.header.GET.getValue("p3").toInt();
+		paintPages(siteId, tpl);
+		paintWidgets(siteId, tpl);
 
-		String sql = "select * from sites where id='" + (String)page->site->siteId + "'";
+		String sql = "select * from sites where id='" + (String)siteId + "'";
 		int count = query->active(sql);
 		if (count > 0) {
 			String url = query->getFieldValue(0, "url");
@@ -144,6 +148,7 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 			String name = query->getFieldValue(0, "name");
 			String about = query->getFieldValue(0, "about");
 			String keywords = query->getFieldValue(0, "keywords");
+			tpl->out("siteId", siteId);
 			tpl->out("url", url);
 			tpl->out("urlView", urlView);
 			tpl->out("name", name);
@@ -162,30 +167,67 @@ void BuilderModule::paintSitesDelete(WebPage *page, HttpRequest &request) {
 }
 
 void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
+	String p2 = request.header.GET.getValue("p2");
+
+	if (p2 == "addPage") ajaxAddPage(page, request);
+	else if (p2 == "deletePage") ajaxDeletePage(page, request);
+}
+
+void BuilderModule::ajaxAddPage(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
-	String func = request.header.GET.getValue("p2");
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	String url = request.header.POST.getValue("url");
+	int moduleId = request.header.POST.getValue("moduleId").toInt();
+	int isMainPage = request.header.POST.getValue("isMainPage").toInt();
+	String title = request.header.POST.getValue("title");
+	String description = request.header.POST.getValue("description");
+	String keywords = request.header.POST.getValue("keywords");
 
-	if (func == "addPage") {
-		String url = request.header.POST.getValue("url");
-		int moduleId = request.header.POST.getValue("moduleId").toInt();
+	page->tplIndex->out("out", "<note>\n");
+	if (siteId > 0) {
+		String sql = "insert into pages (siteId, url, isMainPage, moduleId, title, description, keywords) values('"
+			+ (String)siteId + "', '" + url + "', '" + (String)isMainPage + "', '" + (String)moduleId + "', '" + title + "', '" + description + "', '" + keywords + "')";
+		string sql8 = sql.toString8();
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<result>1</result>\n");
 
-		int siteId = page->site->siteId; // request.header.GET.getValue("p3").toInt();
-		int isMainPage = 0;
-		String title = "", description, keyword;
-
-
-		page->tplIndex->out("out", "<note>\n");
-
-		if (siteId > 0) {
-			String sql = "insert into page (siteId, url, isMainPage, moduleId, title, description, keywords) values('"
-				+ (String)siteId + "', '" + url + "', '" + (String)isMainPage + "', '" + (String)moduleId + "', '" + title +"', '" + description +"', '" + keyword +"')";
+			String sql = "select count(*) cnt from pages where siteId='" + (String)siteId + "' and deleted=0 and moduleId>0";
 			string sql8 = sql.toString8();
-			if (query->exec(sql)) {
-				page->tplIndex->out("out", "<result>1</result>\n");
+			int count = query->active(sql);
+			if (count > 0) {
+				int cnt = query->getFieldValue(0, "cnt").toInt();
+				int index = cnt;
+				page->tplIndex->out("out", "<index>" + (String)index + "</index>\n");
 			}
+
+			sql = "select name from modules where id='" + (String)moduleId + "'";
+			sql8 = sql.toString8();
+			count = query->active(sql);
+			if (count > 0) {
+				String name = query->getFieldValue(0, "name");
+				page->tplIndex->out("out", "<moduleName>" + name + "</moduleName>\n");
+			}
+
 		}
-		page->tplIndex->out("out", "</note>\n");
 	}
+	page->tplIndex->out("out", "</note>\n");
+}
+
+void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int pageId = request.header.POST.getValue("pageId").toInt();
+	int index = request.header.POST.getValue("index").toInt();
+	if (pageId > 0) {
+		String sql = "update pages set deleted=1, dtDeleted=now() where id='" + (String)pageId + "'";
+		string sql8 = sql.toString8();
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<note>\n");
+			page->tplIndex->out("out", "<result>1</result>\n");
+			page->tplIndex->out("out", "</note>\n");
+		}
+	}
+
 }
 
 }
