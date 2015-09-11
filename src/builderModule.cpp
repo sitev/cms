@@ -35,7 +35,7 @@ void BuilderModule::paintMain(WebPage *page, HttpRequest &request) {
 	String tplPath = manager->modulePath + "/builder/" + mainTpl;
 	if (tpl->open(tplPath)) {
 		if (userId > 0) {
-			String sql = "select * from sites where userId='" + (String)userId + "'";
+			String sql = "select * from sites where userId='" + (String)userId + "' and deleted=0";
 			int count = query->active(sql);
 			for (int i = 0; i < count; i++) {
 				int siteId = query->getFieldValue(i, "id").toInt();
@@ -140,7 +140,7 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 		paintPages(siteId, tpl);
 		paintWidgets(siteId, tpl);
 
-		String sql = "select * from sites where id='" + (String)siteId + "'";
+		String sql = "select * from sites where id='" + (String)siteId + "' and deleted=0";
 		int count = query->active(sql);
 		if (count > 0) {
 			String url = query->getFieldValue(0, "url");
@@ -166,12 +166,120 @@ void BuilderModule::paintSitesDelete(WebPage *page, HttpRequest &request) {
 
 }
 
+
+
 void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	String p2 = request.header.GET.getValue("p2");
 
-	if (p2 == "addPage") ajaxAddPage(page, request);
+	if (p2 == "createSite") ajaxCreateSite(page, request);
+	else if (p2 == "getUrlByIndex") ajaxGetUrlByIndex(page, request);
+	else if (p2 == "getSiteIdByIndex") ajaxGetSiteIdByIndex(page, request);
+	else if (p2 == "deleteSite") ajaxDeleteSite(page, request);
+	else if (p2 == "addPage") ajaxAddPage(page, request);
 	else if (p2 == "deletePage") ajaxDeletePage(page, request);
 }
+
+void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = manager->getUserId(uuid);
+
+	String url = request.header.POST.getValue("url");
+	String name = request.header.POST.getValue("name");
+	String about = request.header.POST.getValue("about");
+
+	page->tplIndex->out("out", "<note>\n");
+	if (userId != 0 && url != "") {
+		String sql = "insert into sites (userId, url, name, about) values ('" + (String)userId + "', '" + url + "', '" + name + "', '" + about + "')";
+		string s8 = sql.toString8();
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<result>1</result>\n");
+
+			String sql = "select count(*) cnt from sites where userId='" + (String)userId + "' and deleted=0";
+			int count = query->active(sql);
+			if (count > 0) {
+				int cnt = query->getFieldValue(0, "cnt").toInt();
+				int index = cnt;
+				page->tplIndex->out("out", "<index>" + (String)index + "</index>\n");
+			}
+		}
+	}
+	page->tplIndex->out("out", "</note>\n");
+}
+
+void BuilderModule::ajaxGetUrlByIndex(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = manager->getUserId(uuid);
+
+	int index = request.header.POST.getValue("index").toInt();
+
+	page->tplIndex->out("out", "<note>\n");
+
+	String sql = "select * from sites where userId='" + (String)userId + "' and deleted=0";
+	int count = query->active(sql);
+	for (int i = 0; i < count; i++) {
+		int siteId = query->getFieldValue(i, "id").toInt();
+		String url = "/builder/edit/" + (String)siteId;
+		if (i == index) {
+			page->tplIndex->out("out", "<result>1</result>\n");
+			page->tplIndex->out("out", "<url>" + url + "</url>\n");
+			break;
+		}
+	}
+
+	page->tplIndex->out("out", "</note>\n");
+}
+
+void BuilderModule::ajaxGetSiteIdByIndex(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = manager->getUserId(uuid);
+
+	int index = request.header.POST.getValue("index").toInt();
+
+	page->tplIndex->out("out", "<note>\n");
+
+	String sql = "select * from sites where userId='" + (String)userId + "' and deleted=0";
+	int count = query->active(sql);
+	for (int i = 0; i < count; i++) {
+		int siteId = query->getFieldValue(i, "id").toInt();
+		String url = "/builder/edit/" + (String)siteId;
+		if (i == index) {
+			page->tplIndex->out("out", "<result>1</result>\n");
+			page->tplIndex->out("out", "<siteId>" + (String)siteId + "</siteId>\n");
+			break;
+		}
+	}
+
+	page->tplIndex->out("out", "</note>\n");
+}
+
+void BuilderModule::ajaxDeleteSite(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = manager->getUserId(uuid);
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+
+	page->tplIndex->out("out", "<note>\n");
+	if (userId > 0) {
+		String sql = "update sites set deleted=1 where id='" + (String)siteId + "' and userId='" + (String)userId + "'";
+		string sql8 = sql.toString8();
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<result>1</result>\n");
+		}
+	}
+	page->tplIndex->out("out", "</note>\n");
+}
+
+
+
+
 
 void BuilderModule::ajaxAddPage(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();

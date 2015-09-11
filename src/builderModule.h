@@ -21,6 +21,12 @@ public:
 	virtual void paintSitesDelete(WebPage *page, HttpRequest &request);
 
 	virtual void ajax(WebPage *page, HttpRequest &request);
+	virtual void ajaxCreateSite(WebPage *page, HttpRequest &request);
+	virtual void ajaxGetUrlByIndex(WebPage *page, HttpRequest &request);
+	virtual void ajaxGetSiteIdByIndex(WebPage *page, HttpRequest &request);
+	virtual void ajaxDeleteSite(WebPage *page, HttpRequest &request);
+
+
 	virtual void ajaxAddPage(WebPage *page, HttpRequest &request);
 	virtual void ajaxDeletePage(WebPage *page, HttpRequest &request);
 };
