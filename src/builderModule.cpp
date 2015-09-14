@@ -17,9 +17,9 @@ void BuilderModule::paint(WebPage *page, HttpRequest &request) {
 
 	String p2 = request.header.GET.getValue("p2");
 	if (p2 == "") paintMain(page, request);
-	else if (p2 == "add") paintSitesAdd(page, request);
+	//else if (p2 == "add") paintSitesAdd(page, request);
 	else if (p2 == "edit") paintSitesEdit(page, request);
-	else if (p2 == "delete") paintSitesDelete(page, request);
+	//else if (p2 == "delete") paintSitesDelete(page, request);
 
 }
 
@@ -91,8 +91,7 @@ void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 		String keywords = query->getFieldValue(i, "keywords");
 
 		tpl->out("pages", "<tr id='" + (String)pageId + "'><td>" + (String)(i + 1) + "</td><td>" + url + "</td><td>" + moduleName + "</td><td>" + (String)isMainPage + "</td><td>" +
-			title + "</td><td>" + description + "</td><td>" + keywords + "</td><td><a href='#' data-toggle='modal' data-target='#modRemovePage' data-pageid='" + 
-			(String)pageId + "' data-index='" + (String)i + "' data-url='" + url + "' data-title='" + title + "'><i class='glyphicon glyphicon-remove'></i></a></td></tr>");
+			title + "</td><td>" + description + "</td><td>" + keywords + "</td></tr>");
 	}
 
 	delete query;
@@ -154,6 +153,11 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 			tpl->out("name", name);
 			tpl->out("about", about);
 			tpl->out("keywords", keywords);
+
+			String p4 = request.header.GET.getValue("p4");
+			if (p4 == "") tpl->out("in0", "in");
+			else if (p4 == "pages") tpl->out("in1", "in");
+			else if (p4 == "widgets") tpl->out("in2", "in");
 		}
 		tpl->exec();
 		page->out("content", tpl->html);
@@ -177,6 +181,8 @@ void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	else if (p2 == "deleteSite") ajaxDeleteSite(page, request);
 	else if (p2 == "addPage") ajaxAddPage(page, request);
 	else if (p2 == "deletePage") ajaxDeletePage(page, request);
+	else if (p2 == "accept") ajaxAccept(page, request);
+	else if (p2 == "edit") ajaxEditPage(page, request);
 }
 
 void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
@@ -277,10 +283,6 @@ void BuilderModule::ajaxDeleteSite(WebPage *page, HttpRequest &request) {
 	page->tplIndex->out("out", "</note>\n");
 }
 
-
-
-
-
 void BuilderModule::ajaxAddPage(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 	int siteId = request.header.POST.getValue("siteId").toInt();
@@ -335,6 +337,45 @@ void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
 			page->tplIndex->out("out", "</note>\n");
 		}
 	}
+
+}
+
+void BuilderModule::ajaxAccept(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	String url = request.header.POST.getValue("url");
+	String name = request.header.POST.getValue("name");
+	String about = request.header.POST.getValue("about");
+	String caption = request.header.POST.getValue("caption");
+	int design = request.header.POST.getValue("desing").toInt();
+	int theme = request.header.POST.getValue("theme").toInt();
+	int layout = request.header.POST.getValue("maket").toInt();
+
+	String sql = "update sites set url='" + url + "', name='" + name + "', about='" + about + "', caption='" + caption + "', design='" + design + 
+		"', theme='" + theme + "', layout='" + layout + "' where id='" + (String)siteId + "'";
+
+	if (query->exec(sql)) {
+		page->tplIndex->out("out", "<note>\n");
+		page->tplIndex->out("out", "<result>1</result>\n");
+		page->tplIndex->out("out", "</note>\n");
+	}
+	int a = 1;
+
+}
+
+void BuilderModule::ajaxEditPage(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	String url = request.header.POST.getValue("url");
+	String title = request.header.POST.getValue("title");
+	String description = request.header.POST.getValue("description");
+	String keywords = request.header.POST.getValue("keywords");
+	int moduleId = request.header.POST.getValue("moduleId").toInt();
+	int isMainPage = request.header.POST.getValue("isMainPage").toInt();
+
+
 
 }
 
