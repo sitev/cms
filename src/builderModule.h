@@ -28,10 +28,11 @@ public:
 
 
 	virtual void ajaxAddPage(WebPage *page, HttpRequest &request);
-	virtual void ajaxDeletePage(WebPage *page, HttpRequest &request);
+	//virtual void ajaxDeletePage(WebPage *page, HttpRequest &request);
 
 	virtual void ajaxAccept(WebPage *page, HttpRequest &request);
 	virtual void ajaxEditPage(WebPage *page, HttpRequest &request);
+	virtual void ajaxDeletePage(WebPage *page, HttpRequest &request);
 };
 
 }

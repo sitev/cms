@@ -139,7 +139,7 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 		paintPages(siteId, tpl);
 		paintWidgets(siteId, tpl);
 
-		String sql = "select * from sites where id='" + (String)siteId + "' and deleted=0";
+		String sql = "select * from sites where id='" + (String)siteId + "' and deleted=0 order by id";
 		int count = query->active(sql);
 		if (count > 0) {
 			String url = query->getFieldValue(0, "url");
@@ -180,9 +180,10 @@ void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	else if (p2 == "getSiteIdByIndex") ajaxGetSiteIdByIndex(page, request);
 	else if (p2 == "deleteSite") ajaxDeleteSite(page, request);
 	else if (p2 == "addPage") ajaxAddPage(page, request);
-	else if (p2 == "deletePage") ajaxDeletePage(page, request);
+//	else if (p2 == "deletePage") ajaxDeletePage(page, request);
 	else if (p2 == "accept") ajaxAccept(page, request);
-	else if (p2 == "edit") ajaxEditPage(page, request);
+	else if (p2 == "editPage") ajaxEditPage(page, request);
+	else if (p2 == "deletePage") ajaxDeletePage(page, request);
 }
 
 void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
@@ -322,7 +323,7 @@ void BuilderModule::ajaxAddPage(WebPage *page, HttpRequest &request) {
 	}
 	page->tplIndex->out("out", "</note>\n");
 }
-
+/*
 void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 
@@ -339,7 +340,7 @@ void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
 	}
 
 }
-
+*/
 void BuilderModule::ajaxAccept(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 
@@ -360,23 +361,62 @@ void BuilderModule::ajaxAccept(WebPage *page, HttpRequest &request) {
 		page->tplIndex->out("out", "<result>1</result>\n");
 		page->tplIndex->out("out", "</note>\n");
 	}
-	int a = 1;
-
 }
 
 void BuilderModule::ajaxEditPage(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 
 	int siteId = request.header.POST.getValue("siteId").toInt();
+	int pageIndex = request.header.POST.getValue("pageIndex").toInt();
+	int pageId = 0;
+
 	String url = request.header.POST.getValue("url");
+	int moduleId = request.header.POST.getValue("moduleId").toInt();
+	int isMainPage = request.header.POST.getValue("isMainPage").toInt();
 	String title = request.header.POST.getValue("title");
 	String description = request.header.POST.getValue("description");
 	String keywords = request.header.POST.getValue("keywords");
-	int moduleId = request.header.POST.getValue("moduleId").toInt();
-	int isMainPage = request.header.POST.getValue("isMainPage").toInt();
 
+	String sql = "select p.id, p.url, m.name, p.isMainPage, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
+		(String)siteId + "' and deleted=0 order by p.id limit " + (String)pageIndex + ", 1";
+	int count = query->active(sql);
+	if (count > 0) {
+		pageId = query->getFieldValue(0, "id").toInt();
+	}
 
+	if (pageId > 0) {
+		sql = "update pages set url='" + url + "', moduleId='" + (String)moduleId + "', isMainPage='" + (String)isMainPage +
+			"', title='" + title + "', description='" + description + "', keywords='" + keywords + "' where siteId='" + (String)siteId + "' and id='" + (String)pageId + "'";
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<note>\n");
+			page->tplIndex->out("out", "<result>1</result>\n");
+			page->tplIndex->out("out", "</note>\n");
+		}
+	}
+}
 
+void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int pageIndex = request.header.POST.getValue("pageIndex").toInt();
+	int pageId = 0;
+
+	String sql = "select p.id, p.url, m.name, p.isMainPage, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
+		(String)siteId + "' and deleted=0 order by p.id limit " + (String)pageIndex + ", 1";
+	int count = query->active(sql);
+	if (count > 0) {
+		pageId = query->getFieldValue(0, "id").toInt();
+	}
+
+	if (pageId > 0) {
+		sql = "update pages set deleted=1, dtDeleted=now() where siteId='" + (String)siteId + "' and id='" + (String)pageId + "'";
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<note>\n");
+			page->tplIndex->out("out", "<result>1</result>\n");
+			page->tplIndex->out("out", "</note>\n");
+		}
+	}
 }
 
 }
