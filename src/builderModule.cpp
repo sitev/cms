@@ -18,6 +18,7 @@ void BuilderModule::paint(WebPage *page, HttpRequest &request) {
 	String p2 = request.header.GET.getValue("p2");
 	if (p2 == "") paintMain(page, request);
 	else if (p2 == "edit") paintSitesEdit(page, request);
+	else if (p2 == "editContent") paintEditContent(page, request);
 }
 
 void BuilderModule::paintMain(WebPage *page, HttpRequest &request) {
@@ -110,6 +111,7 @@ void BuilderModule::paintWidgets(int siteId, WebTemplate *tpl) {
 
 	manager->deleteQuery(query);
 }
+
 void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 	WebTemplate *tpl = new WebTemplate();
@@ -147,6 +149,27 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 	manager->deleteQuery(query);
 }
 
+void BuilderModule::paintEditContent(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+	int siteId = request.header.GET.getValue("p3").toInt();
+	int pageId = request.header.GET.getValue("p4").toInt();
+	WebTemplate *tpl = new WebTemplate();
+	String tplName = "editContent_tpl.html";
+	if (tpl->open(manager->modulePath + "/builder/" + tplName)) {
+		tpl->out("siteId", siteId);
+		tpl->out("pageId", pageId);
+
+		String sql = "select t.value from pages p, data d, dataText t where d.pageid=p.id and d.dataId=t.id and p.id='" + (String)pageId + "'";
+		int count = query->active(sql);
+		if (count > 0) {
+			String text = query->getFieldValue(0, "value");
+			string text8 = text.to_string();
+			tpl->out("text", text);
+		}
+		tpl->exec();
+		page->out("content", tpl->html);
+	}
+}
 
 void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	String p2 = request.header.GET.getValue("p2");
@@ -156,10 +179,11 @@ void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	else if (p2 == "getSiteIdByIndex") ajaxGetSiteIdByIndex(page, request);
 	else if (p2 == "deleteSite") ajaxDeleteSite(page, request);
 	else if (p2 == "addPage") ajaxAddPage(page, request);
-//	else if (p2 == "deletePage") ajaxDeletePage(page, request);
 	else if (p2 == "accept") ajaxAccept(page, request);
 	else if (p2 == "editPage") ajaxEditPage(page, request);
 	else if (p2 == "deletePage") ajaxDeletePage(page, request);
+	else if (p2 == "getPageId") ajaxGetPageId(page, request);
+	else if (p2 == "saveContent") ajaxSaveContent(page, request);
 }
 
 void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
@@ -412,6 +436,50 @@ void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
 			page->tplIndex->out("out", "</note>\n");
 		}
 	}
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxGetPageId(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int pageIndex = request.header.POST.getValue("pageIndex").toInt();
+
+	String sql = "select p.id, p.url, m.name, p.isMainPage, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
+		(String)siteId + "' and deleted=0 order by p.id limit " + (String)pageIndex + ", 1";
+	int count = query->active(sql);
+	if (count > 0) {
+		int pageId = query->getFieldValue(0, "id").toInt();
+
+		page->tplIndex->out("out", "<note>\n");
+		page->tplIndex->out("out", "<result>1</result>\n");
+		page->tplIndex->out("out", "<pageId>" + (String)pageId + "</pageId>\n");
+		page->tplIndex->out("out", "</note>\n");
+	}
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxSaveContent(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int pageId = request.header.POST.getValue("pageId").toInt();
+	String text = request.header.POST.getValue("text");
+
+	String sql = "select dataId from data where pageId='" + (String)pageId + "'";
+	string sql8 = sql.to_string();
+	int count = query->active(sql);
+	if (count > 0) {
+		int dataId = query->getFieldValue(0, "dataId").toInt();
+
+		sql = "update dataText set value='" + text + "' where id='" + (String)dataId + "'";
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<note>\n");
+			page->tplIndex->out("out", "<result>1</result>\n");
+			page->tplIndex->out("out", "</note>\n");
+		}
+	}
+
 	manager->deleteQuery(query);
 }
 
