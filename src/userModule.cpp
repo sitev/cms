@@ -99,6 +99,7 @@ void UserModule::sendAccount(WebPage *page, HttpRequest &request) {
 			page->out("content", tpl->html);
 		}
 	}
+	manager->deleteQuery(query);
 }
 
 void UserModule::activate(WebPage *page, HttpRequest &request) {
@@ -117,6 +118,7 @@ void UserModule::activate(WebPage *page, HttpRequest &request) {
 		tpl->exec();
 		page->out("content", tpl->html);
 	}
+	manager->deleteQuery(query);
 }
 void UserModule::changePassword(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
@@ -286,6 +288,7 @@ void UserModule::ajax(WebPage *page, HttpRequest &request) {
 		}
 		page->tplIndex->out("out", "</note>\n");
 	}
+	manager->deleteQuery(query);
 }
 
 }

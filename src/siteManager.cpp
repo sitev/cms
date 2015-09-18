@@ -101,6 +101,10 @@ MySQL* SiteManager::newQuery() {
 	return query;
 }
 
+void SiteManager::deleteQuery(MySQL *query) {
+	delete query;
+}
+
 void SiteManager::initSites() {
 	printf("initSites();\n");
 	MySQL *query = newQuery();
@@ -113,7 +117,7 @@ void SiteManager::initSites() {
 			printf("count = %d\n", count);
 			for (int i = 0; i < count; i++) {
 				int siteId = query->getFieldValue(i, "id").toInt();
-				string url = query->getFieldValue(i, "url").toString8();
+				string url = query->getFieldValue(i, "url").to_string();
 				WebSite *ws = new WebSite(this, url, siteId);
 				sites.insert(std::pair<string, WebSite*>(url, ws));
 
@@ -122,7 +126,7 @@ void SiteManager::initSites() {
 					if (queryPages->storeResult()) {
 						int count = queryPages->getRowCount();
 						for (int i = 0; i < count; i++) {
-							string url = queryPages->getFieldValue(i, "url").toString8();
+							string url = queryPages->getFieldValue(i, "url").to_string();
 							int isMainPage = queryPages->getFieldValue(i, "isMainPage").toInt();
 							int pageId = queryPages->getFieldValue(i, "id").toInt();
 							int moduleId = queryPages->getFieldValue(i, "moduleId").toInt();
@@ -137,12 +141,19 @@ void SiteManager::initSites() {
 			}
 		}
 	}
+	this->deleteQuery(queryPages);
+	this->deleteQuery(query);
 }
 
 void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
-	string host = request.header.getValue("Host").toString8();
+	string host = request.header.getValue("Host").to_string();
 	printf("host = %s\n", host.c_str());
 	if (host == "127.0.0.1:8080") host = LOCALHOST;
+
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = getUserId(uuid);
+	//if (userId == 2) host = "my.sitev.ru";
+
 
 	string page = "";
 	int count = request.header.GET.getCount();
@@ -189,9 +200,12 @@ String SiteManager::getLogin(String uuid) {
 			if (count == 0) return "";
 			String login = query->getFieldValue(0, "login");
 			if (login == "") login = query->getFieldValue(0, "email");
+
+			deleteQuery(query);
 			return login;
 		}
 	}
+	deleteQuery(query);
 	return "";
 }
 
@@ -203,15 +217,17 @@ int SiteManager::getUserId(String uuid) {
 			int count = query->getRowCount();
 			if (count == 0) return 0;
 			int userId = query->getFieldValue(0, "userId").toInt();
+			deleteQuery(query);
 			return userId;
 		}
 	}
+	deleteQuery(query);
 	return 0;
 }
 
 String SiteManager::isPasswordCorrect(String password) {
 	int count = password.getLength();
-	if (count < 6) return "����� ������ �� ����� ���� ������ 5-�� ��������";
+	if (count < 6) return "< 6 chars";
 	return "";
 }
 

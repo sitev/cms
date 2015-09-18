@@ -43,7 +43,7 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		f->readAll(s);
 		tplIndex->exec(s, t);
 		
-		string t8 = t.toString8();
+		string t8 = t.to_string();
 		int len = t8.length();
 
 		this->out("HTTP/1.1 200 OK\r\nContent-type: text/html; charset=UTF-8\r\n");
@@ -53,10 +53,10 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 	else {
 		printf("WebPage::paint\n");
 		fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
-		printf("fn = %s\n", fn.toString8().c_str());
+		printf("fn = %s\n", fn.to_string().c_str());
 		int ret;
 		struct stat buf;
-		if ((ret = stat(fn.toString8().c_str(), &buf)) != 0) {
+		if ((ret = stat(fn.to_string().c_str(), &buf)) != 0) {
 			fn = site->manager->documentRoot + "/common/index_tpl.html";
 		}
 
@@ -80,7 +80,7 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		site->manager->widgetManager.paintPageWidgets(this);
 
 		String uuid = request.header.COOKIE.getValue("uuid");
-		string uuid8 = uuid.toString8();
+		string uuid8 = uuid.to_string();
 		if (uuid.getLength() < 10) 
 			uuid = generateUUID();
 
@@ -108,7 +108,7 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		tplIndex->exec(s, t);
 
 
-		string t8 = t.toString8();
+		string t8 = t.to_string();
 		int len = t8.length();
 		this->out("HTTP/1.1 200 OK\r\nContent-type: text/html; charset=UTF-8\r\n");
 		this->out("Set-Cookie: uuid=" + uuid + "\r\nContent-Length: " + (String)len + "\r\n\r\n");
@@ -120,8 +120,8 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 }
 
 void WebPage::out(String s) {
-	int len = s.toString8().length();
-	response->memory.write((void*)(s.toString8().c_str()), len);
+	int len = s.to_string().length();
+	response->memory.write((void*)(s.to_string().c_str()), len);
 }
 
 void WebPage::out(String tag, String s) {

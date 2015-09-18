@@ -16,9 +16,7 @@ public:
 	virtual void paintPages(int siteId, WebTemplate *tpl);
 	virtual void paintWidgets(int siteId, WebTemplate *tpl);
 
-	virtual void paintSitesAdd(WebPage *page, HttpRequest &request);
 	virtual void paintSitesEdit(WebPage *page, HttpRequest &request);
-	virtual void paintSitesDelete(WebPage *page, HttpRequest &request);
 
 	virtual void ajax(WebPage *page, HttpRequest &request);
 	virtual void ajaxCreateSite(WebPage *page, HttpRequest &request);
@@ -27,6 +25,8 @@ public:
 	virtual void ajaxDeleteSite(WebPage *page, HttpRequest &request);
 
 
+	virtual int getPageIndex(MySQL *query, int siteId);
+	virtual bool createDataText(MySQL *query, int pageId, int moduleId, int userId);
 	virtual void ajaxAddPage(WebPage *page, HttpRequest &request);
 	//virtual void ajaxDeletePage(WebPage *page, HttpRequest &request);
 

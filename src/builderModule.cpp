@@ -17,10 +17,7 @@ void BuilderModule::paint(WebPage *page, HttpRequest &request) {
 
 	String p2 = request.header.GET.getValue("p2");
 	if (p2 == "") paintMain(page, request);
-	//else if (p2 == "add") paintSitesAdd(page, request);
 	else if (p2 == "edit") paintSitesEdit(page, request);
-	//else if (p2 == "delete") paintSitesDelete(page, request);
-
 }
 
 void BuilderModule::paintMain(WebPage *page, HttpRequest &request) {
@@ -58,6 +55,7 @@ void BuilderModule::paintMain(WebPage *page, HttpRequest &request) {
 		tpl->exec();
 		page->out("content", tpl->html);
 	}
+	manager->deleteQuery(query);
 }
 
 void BuilderModule::paintModules(WebTemplate *tpl) {
@@ -72,7 +70,7 @@ void BuilderModule::paintModules(WebTemplate *tpl) {
 		tpl->out("modules", "<option value='" + (String)moduleId + "'>" + name + "</option>");
 	}
 
-	delete query;
+	manager->deleteQuery(query);
 }
 
 void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
@@ -94,7 +92,7 @@ void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 			title + "</td><td>" + description + "</td><td>" + keywords + "</td></tr>");
 	}
 
-	delete query;
+	manager->deleteQuery(query);
 }
 
 void BuilderModule::paintWidgets(int siteId, WebTemplate *tpl) {
@@ -110,25 +108,8 @@ void BuilderModule::paintWidgets(int siteId, WebTemplate *tpl) {
 		tpl->out("widgets", "<tr><td>" + (String)(i + 1) + "</td><td>" + tag + "</td><td>" + name + "</td></tr>");
 	}
 
-	delete query;
+	manager->deleteQuery(query);
 }
-
-void BuilderModule::paintSitesAdd(WebPage *page, HttpRequest &request) {
-	MySQL *query = manager->newQuery();
-	WebTemplate *tpl = new WebTemplate();
-	String tplName = "sitesAdd_tpl.html";
-
-	String uuid = request.header.COOKIE.getValue("uuid");
-	int userId = manager->getUserId(uuid);
-	if (userId == 0) tplName = "notAuth_tpl.html";
-
-	String tplPath = manager->modulePath + "/builder/" + tplName;
-	if (tpl->open(tplPath)) {
-		tpl->exec();
-		page->out("content", tpl->html);
-	}
-}
-
 void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 	WebTemplate *tpl = new WebTemplate();
@@ -163,13 +144,8 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 		page->out("content", tpl->html);
 	}
 
-	delete query;
+	manager->deleteQuery(query);
 }
-
-void BuilderModule::paintSitesDelete(WebPage *page, HttpRequest &request) {
-
-}
-
 
 
 void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
@@ -199,7 +175,7 @@ void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
 	page->tplIndex->out("out", "<note>\n");
 	if (userId != 0 && url != "") {
 		String sql = "insert into sites (userId, url, name, about) values ('" + (String)userId + "', '" + url + "', '" + name + "', '" + about + "')";
-		string s8 = sql.toString8();
+		string s8 = sql.to_string();
 		if (query->exec(sql)) {
 			page->tplIndex->out("out", "<result>1</result>\n");
 
@@ -213,6 +189,7 @@ void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
 		}
 	}
 	page->tplIndex->out("out", "</note>\n");
+	manager->deleteQuery(query);
 }
 
 void BuilderModule::ajaxGetUrlByIndex(WebPage *page, HttpRequest &request) {
@@ -238,6 +215,8 @@ void BuilderModule::ajaxGetUrlByIndex(WebPage *page, HttpRequest &request) {
 	}
 
 	page->tplIndex->out("out", "</note>\n");
+
+	manager->deleteQuery(query);
 }
 
 void BuilderModule::ajaxGetSiteIdByIndex(WebPage *page, HttpRequest &request) {
@@ -263,6 +242,7 @@ void BuilderModule::ajaxGetSiteIdByIndex(WebPage *page, HttpRequest &request) {
 	}
 
 	page->tplIndex->out("out", "</note>\n");
+	manager->deleteQuery(query);
 }
 
 void BuilderModule::ajaxDeleteSite(WebPage *page, HttpRequest &request) {
@@ -276,13 +256,40 @@ void BuilderModule::ajaxDeleteSite(WebPage *page, HttpRequest &request) {
 	page->tplIndex->out("out", "<note>\n");
 	if (userId > 0) {
 		String sql = "update sites set deleted=1 where id='" + (String)siteId + "' and userId='" + (String)userId + "'";
-		string sql8 = sql.toString8();
+		string sql8 = sql.to_string();
 		if (query->exec(sql)) {
 			page->tplIndex->out("out", "<result>1</result>\n");
 		}
 	}
 	page->tplIndex->out("out", "</note>\n");
+	manager->deleteQuery(query);
 }
+
+int BuilderModule::getPageIndex(MySQL *query, int siteId) {
+	String sql = "select count(*) cnt from pages where siteId='" + (String)siteId + "' and deleted=0 and moduleId>0";
+	string sql8 = sql.to_string();
+	int count = query->active(sql);
+	if (count > 0) {
+		int cnt = query->getFieldValue(0, "cnt").toInt();
+		return cnt;
+	}
+	return 0;
+}
+
+bool BuilderModule::createDataText(MySQL *query, int pageId, int moduleId, int userId) {
+	String sql = "insert into dataText (value) values ('')";
+	if (query->exec(sql)) {
+		int dataId = query->getLastId();
+
+		sql = "insert into data (pageId, dataId, moduleId, userId) values('" + (String)pageId + "', '" + (String)dataId + "', '" + 
+			(String)moduleId + "', '" + (String)userId + "')";
+		if (query->exec(sql)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 
 void BuilderModule::ajaxAddPage(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
@@ -294,26 +301,29 @@ void BuilderModule::ajaxAddPage(WebPage *page, HttpRequest &request) {
 	String description = request.header.POST.getValue("description");
 	String keywords = request.header.POST.getValue("keywords");
 
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = manager->getUserId(uuid);
+
 	page->tplIndex->out("out", "<note>\n");
 	if (siteId > 0) {
 		String sql = "insert into pages (siteId, url, isMainPage, moduleId, title, description, keywords) values('"
 			+ (String)siteId + "', '" + url + "', '" + (String)isMainPage + "', '" + (String)moduleId + "', '" + title + "', '" + description + "', '" + keywords + "')";
-		string sql8 = sql.toString8();
+		string sql8 = sql.to_string();
 		if (query->exec(sql)) {
-			page->tplIndex->out("out", "<result>1</result>\n");
+			int pageId = query->getLastId();
 
-			String sql = "select count(*) cnt from pages where siteId='" + (String)siteId + "' and deleted=0 and moduleId>0";
-			string sql8 = sql.toString8();
-			int count = query->active(sql);
-			if (count > 0) {
-				int cnt = query->getFieldValue(0, "cnt").toInt();
-				int index = cnt;
-				page->tplIndex->out("out", "<index>" + (String)index + "</index>\n");
+			int index = getPageIndex(query, siteId);
+			page->tplIndex->out("out", "<index>" + (String)index + "</index>\n");
+
+			bool flag = true;
+			if (moduleId == 1) {
+				flag = createDataText(query, pageId, moduleId, userId);
 			}
+			if (flag) page->tplIndex->out("out", "<result>1</result>\n");
 
-			sql = "select name from modules where id='" + (String)moduleId + "'";
-			sql8 = sql.toString8();
-			count = query->active(sql);
+			String sql = "select name from modules where id='" + (String)moduleId + "'";
+			string sql8 = sql.to_string();
+			int count = query->active(sql);
 			if (count > 0) {
 				String name = query->getFieldValue(0, "name");
 				page->tplIndex->out("out", "<moduleName>" + name + "</moduleName>\n");
@@ -322,25 +332,8 @@ void BuilderModule::ajaxAddPage(WebPage *page, HttpRequest &request) {
 		}
 	}
 	page->tplIndex->out("out", "</note>\n");
+	manager->deleteQuery(query);
 }
-/*
-void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
-	MySQL *query = manager->newQuery();
-
-	int pageId = request.header.POST.getValue("pageId").toInt();
-	int index = request.header.POST.getValue("index").toInt();
-	if (pageId > 0) {
-		String sql = "update pages set deleted=1, dtDeleted=now() where id='" + (String)pageId + "'";
-		string sql8 = sql.toString8();
-		if (query->exec(sql)) {
-			page->tplIndex->out("out", "<note>\n");
-			page->tplIndex->out("out", "<result>1</result>\n");
-			page->tplIndex->out("out", "</note>\n");
-		}
-	}
-
-}
-*/
 void BuilderModule::ajaxAccept(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 
@@ -361,6 +354,7 @@ void BuilderModule::ajaxAccept(WebPage *page, HttpRequest &request) {
 		page->tplIndex->out("out", "<result>1</result>\n");
 		page->tplIndex->out("out", "</note>\n");
 	}
+	manager->deleteQuery(query);
 }
 
 void BuilderModule::ajaxEditPage(WebPage *page, HttpRequest &request) {
@@ -393,6 +387,7 @@ void BuilderModule::ajaxEditPage(WebPage *page, HttpRequest &request) {
 			page->tplIndex->out("out", "</note>\n");
 		}
 	}
+	manager->deleteQuery(query);
 }
 
 void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
@@ -417,6 +412,7 @@ void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
 			page->tplIndex->out("out", "</note>\n");
 		}
 	}
+	manager->deleteQuery(query);
 }
 
 }

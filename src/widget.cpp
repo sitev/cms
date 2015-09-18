@@ -110,6 +110,7 @@ void WidgetManager::paintPageWidgets(WebPage *page) {
 			paintWidget(page, tag, widgetId);
 		}
 	}
+	page->site->manager->deleteQuery(query);
 }
 
 }

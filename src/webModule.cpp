@@ -33,6 +33,7 @@ void WebModule::setOptionsFromDB(int moduleId) {
 			}
 		}
 	}
+	manager->deleteQuery(query);
 }
 
 String WebModule::getModuleUrl() {
@@ -44,10 +45,12 @@ String WebModule::getModuleUrl() {
 			int count = query->getRowCount();
 			if (count > 0) {
 				String url = query->getFieldValue(0, "url");
+				manager->deleteQuery(query);
 				return url;
 			}
 		}
 	}
+	manager->deleteQuery(query);
 	return "";
 }
 
@@ -67,9 +70,8 @@ StaticPageModule::StaticPageModule(SiteManager *manager) : WebModule(manager) {
 void StaticPageModule::paint(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 
-
 	String sql = "select txt.value from data d, dataText txt where d.dataId=txt.id and d.pageId='" + (String)page->pageId + "'";
-	printf("sql = %s\n", sql.toString8().c_str());
+	printf("sql = %s\n", sql.to_string().c_str());
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
@@ -79,6 +81,7 @@ void StaticPageModule::paint(WebPage *page, HttpRequest &request) {
 			}
 		}
 	}
+	manager->deleteQuery(query);
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -283,6 +286,7 @@ void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String n
 			}
 		}
 	}
+	manager->deleteQuery(query);
 }
 
 void NewsModule::paintTags(WebPage *page, String num, WebTemplate *tpl) {
@@ -307,6 +311,7 @@ void NewsModule::paintTags(WebPage *page, String num, WebTemplate *tpl) {
 				}
 			}
 		}
+		manager->deleteQuery(query);
 	}
 }
 
@@ -344,7 +349,7 @@ void NewsModule::ajax(WebPage *page, HttpRequest &request) {
 		if (func == "sendPost") {
 			String name = request.header.POST.getValue("name");
 			String text = request.header.POST.getValue("content");
-			text = request.header.htmlEntitiesDecode(text.toString8());
+			text = request.header.htmlEntitiesDecode(text.to_string());
 			int userId = manager->getUserId(uuid);
 			String result = "";
 
@@ -363,6 +368,7 @@ void NewsModule::ajax(WebPage *page, HttpRequest &request) {
 			page->tplIndex->out("out", "</note>\n");
 		}
 	}
+	manager->deleteQuery(query);
 }
 
 //---------------------------------------------------------------------------------------------------
