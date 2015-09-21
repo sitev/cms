@@ -3,7 +3,7 @@
 #include "cjMySQL.h"
 #include "siteManager.h"
 #include "webSite.h"
-#include "webStudio.h"
+#include "webstudio.h"
 #include "builderModule.h"
 #include "userModule.h"
 #include "webModule.h"
