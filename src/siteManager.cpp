@@ -15,6 +15,12 @@ void SiteManagerHandler::step(HttpRequest &request, HttpResponse &response) {
 	g_mutex.unlock();
 }
 
+bool SiteManagerHandler::isSiteExist(string host) {
+	WebSite *ws = manager->sites[host];
+	if (ws != NULL) return true;
+	return false;
+}
+
 bool SiteManagerHandler::isPageExist(string host) {
 	WebSite *ws = manager->sites[host];
 	if (ws != NULL) {
@@ -152,8 +158,6 @@ void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 
 	String uuid = request.header.COOKIE.getValue("uuid");
 	int userId = getUserId(uuid);
-	//if (userId == 2) host = "my.sitev.ru";
-
 
 	string page = "";
 	int count = request.header.GET.getCount();

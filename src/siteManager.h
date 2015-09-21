@@ -13,6 +13,7 @@ public:
 	SiteManager *manager;
 	SiteManagerHandler(SiteManager *manager);
 	virtual void step(HttpRequest &request, HttpResponse &response);
+	virtual bool isSiteExist(string host);
 	virtual bool isPageExist(string host);
 };
 
