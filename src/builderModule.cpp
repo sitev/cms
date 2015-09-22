@@ -201,6 +201,10 @@ void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
 		String sql = "insert into sites (userId, url, name, about) values ('" + (String)userId + "', '" + url + "', '" + name + "', '" + about + "')";
 		string s8 = sql.to_string();
 		if (query->exec(sql)) {
+
+			int siteId = query->getLastId();
+			manager->addSite(siteId, url.to_string());
+			
 			page->tplIndex->out("out", "<result>1</result>\n");
 
 			String sql = "select count(*) cnt from sites where userId='" + (String)userId + "' and deleted=0";
@@ -335,6 +339,7 @@ void BuilderModule::ajaxAddPage(WebPage *page, HttpRequest &request) {
 		string sql8 = sql.to_string();
 		if (query->exec(sql)) {
 			int pageId = query->getLastId();
+			manager->addPage(siteId, pageId, url.to_string(), isMainPage, moduleId);
 
 			int index = getPageIndex(query, siteId);
 			page->tplIndex->out("out", "<index>" + (String)index + "</index>\n");
