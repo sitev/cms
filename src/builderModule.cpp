@@ -173,6 +173,7 @@ void BuilderModule::paintEditContent(WebPage *page, HttpRequest &request) {
 
 void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	String p2 = request.header.GET.getValue("p2");
+	string p2_8 = p2.to_string();
 
 	if (p2 == "createSite") ajaxCreateSite(page, request);
 	else if (p2 == "getUrlByIndex") ajaxGetUrlByIndex(page, request);
@@ -470,6 +471,7 @@ void BuilderModule::ajaxSaveContent(WebPage *page, HttpRequest &request) {
 	int siteId = request.header.POST.getValue("siteId").toInt();
 	int pageId = request.header.POST.getValue("pageId").toInt();
 	String text = request.header.POST.getValue("text");
+	text = request.header.htmlEntitiesDecode(text.to_string());
 
 	String sql = "select dataId from data where pageId='" + (String)pageId + "'";
 	string sql8 = sql.to_string();
