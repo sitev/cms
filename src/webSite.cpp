@@ -14,4 +14,15 @@ WebSite::WebSite(SiteManager *manager, string host, int siteId) {
 	mainPage = NULL;
 }
 
+WebPage* WebSite::getPageById(int pageId) {
+	for (auto it = pages.begin(); it != pages.end(); it++)
+	{
+		WebPage *page = it->second;
+		if (page->pageId == pageId) {
+			return page;
+		}
+	}
+	return NULL;
+}
+
 }

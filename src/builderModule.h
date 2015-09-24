@@ -27,14 +27,18 @@ public:
 
 
 	virtual int getPageIndex(MySQL *query, int siteId);
+	virtual int setMainPage(MySQL *query, int siteId);
 	virtual bool createDataText(MySQL *query, int pageId, int moduleId, int userId);
+
 	virtual void ajaxAddPage(WebPage *page, HttpRequest &request);
+	virtual void ajaxGetModuleUrl(WebPage *page, HttpRequest &request);
 
 	virtual void ajaxAccept(WebPage *page, HttpRequest &request);
 	virtual void ajaxEditPage(WebPage *page, HttpRequest &request);
 	virtual void ajaxDeletePage(WebPage *page, HttpRequest &request);
 	virtual void ajaxGetPageId(WebPage *page, HttpRequest &request);
 	virtual void ajaxSaveContent(WebPage *page, HttpRequest &request);
+	virtual void ajaxMoveTableRow(WebPage *page, HttpRequest &request);
 };
 
 }

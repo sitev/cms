@@ -32,8 +32,10 @@ public:
 	virtual void initModules();
 	virtual void initSites();
 	virtual WebSite* addSite(int siteId, string url);
-	virtual void addPage(WebSite *site, int pageId, string url, bool isMainPage, int moduleId);
-	virtual void addPage(int siteId, int pageId, string url, bool isMainPage, int moduleId);
+	virtual void addPage(WebSite *site, int pageId, string url, int moduleId);
+	virtual void addPage(int siteId, int pageId, string url, int moduleId);
+	virtual void setMainPage(WebSite *site, int pageId);
+	virtual void setMainPage(int siteId, int pageId);
 	virtual void paintPage(HttpRequest &request, HttpResponse &response);
 
 	String generateUserPassword();

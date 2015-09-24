@@ -17,6 +17,7 @@ public:
 
 	map <string, WebPage*> pages;
 	WebSite(SiteManager *manager, string host, int siteId);
+	virtual WebPage* getPageById(int pageId);
 };
 
 }
