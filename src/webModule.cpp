@@ -109,6 +109,7 @@ void NewsModule::paint(WebPage *page, HttpRequest &request) {
 
 void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 	WebTemplate *tpl = new WebTemplate();
+	string url8 = url.to_string();
 	if (!tpl->open(manager->modulePath + "/" + url + "/index_tpl.html")) return;
 
 	WebTemplate *tplItem = new WebTemplate();
@@ -205,6 +206,7 @@ void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 		if (!tplWrite->open(manager->modulePath + "/" + url + "/addPostButtonNotEnter_tpl.html")) return;
 	}
 
+	tplWrite->out("url", url);
 	tplWrite->exec();
 	tpl->out("out", tplWrite->html);
 
