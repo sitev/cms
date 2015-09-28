@@ -74,28 +74,95 @@ void BuilderModule::paintModules(WebTemplate *tpl) {
 	manager->deleteQuery(query);
 }
 
+void BuilderModule::paintParams(int siteId, WebTemplate *tpl) {
+	MySQL *query = manager->newQuery();
+
+	String sql = "select * from sites where id='" + (String)siteId + "' and deleted=0 order by id";
+	int count = query->active(sql);
+	if (count > 0) {
+
+		String tplPath = manager->modulePath + "/builder/editParams_tpl.html";
+		WebTemplate *tplParams = new WebTemplate();
+		if (tplParams->open(tplPath)) {
+			String url = query->getFieldValue(0, "url");
+			String name = query->getFieldValue(0, "name");
+			String about = query->getFieldValue(0, "about");
+			String keywords = query->getFieldValue(0, "keywords");
+			String caption = query->getFieldValue(0, "caption");
+			tplParams->out("url", url);
+			tplParams->out("name", name);
+			tplParams->out("about", about);
+			tplParams->out("keywords", keywords);
+			tplParams->out("caption", caption);
+			tplParams->exec();
+
+			tpl->out("out", tplParams->html);
+		}
+	}
+
+	tpl->out("siteId", siteId);
+	tpl->out("activeParams", "class='active'");
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::paintDesign(int siteId, WebTemplate *tpl) {
+	MySQL *query = manager->newQuery();
+
+	String tplPath = manager->modulePath + "/builder/editDesign_tpl.html";
+	WebTemplate *tplSub = new WebTemplate();
+	if (tplSub->open(tplPath)) {
+
+		String sql = "select theme, layout from sites where id='" + (String)siteId + "' and deleted=0 order by id";
+		int count = query->active(sql);
+		if (count > 0) {
+			int theme = query->getFieldValue(0, "theme").toInt();
+			int layout = query->getFieldValue(0, "layout").toInt();
+			tplSub->out("themeChecked" + (String)theme, "checked");
+			tplSub->out("layoutChecked" + (String)layout, "checked");
+		}
+
+		tplSub->exec();
+		tpl->out("out", tplSub->html);
+	}
+
+	tpl->out("siteId", siteId);
+	tpl->out("activeDesign", "class='active'");
+	manager->deleteQuery(query);
+}
+
 void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 	MySQL *query = manager->newQuery();
 
-	String sql = "select p.id, p.url, p.isMainPage, m.name, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" + 
-		(String)siteId + "' and deleted=0 order by p.sorting, p.id";
-	int count = query->active(sql);
-	for (int i = 0; i < count; i++) {
-		int pageId = query->getFieldValue(i, "id").toInt();
-		String url = query->getFieldValue(i, "url");
-		int iMainPage = query->getFieldValue(i, "isMainPage").toInt();
-		bool isMainPage = iMainPage;
-		String moduleName = query->getFieldValue(i, "name");
-		String title = query->getFieldValue(i, "title");
-		String description = query->getFieldValue(i, "description");
-		String keywords = query->getFieldValue(i, "keywords");
+	String tplPath = manager->modulePath + "/builder/editPages_tpl.html";
+	WebTemplate *tplSub = new WebTemplate();
+	if (tplSub->open(tplPath)) {
+		paintModules(tplSub);
+		String sql = "select p.id, p.url, p.isMainPage, m.name, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
+			(String)siteId + "' and deleted=0 order by p.sorting, p.id";
+		int count = query->active(sql);
+		for (int i = 0; i < count; i++) {
+			int pageId = query->getFieldValue(i, "id").toInt();
+			String url = query->getFieldValue(i, "url");
+			int iMainPage = query->getFieldValue(i, "isMainPage").toInt();
+			bool isMainPage = iMainPage;
+			String moduleName = query->getFieldValue(i, "name");
+			String title = query->getFieldValue(i, "title");
+			String description = query->getFieldValue(i, "description");
+			String keywords = query->getFieldValue(i, "keywords");
 
-		//if (isMainPage) url = "!" + url;
+			//if (isMainPage) url = "!" + url;
 
-		tpl->out("pages", "<tr id='" + (String)pageId + "'><td>" + (String)(i + 1) + "</td><td>" + url + "</td><td>" + moduleName + "</td><td>" +
-			title + "</td><td>" + description + "</td><td>" + keywords + "</td></tr>");
+			tplSub->out("pages", "<tr id='" + (String)pageId + "'><td>" + (String)(i + 1) + "</td><td>" + url + "</td><td>" + moduleName + "</td><td>" +
+				title + "</td><td>" + description + "</td><td>" + keywords + "</td></tr>");
+		}
+
+		tplSub->exec();
+		tpl->out("out", tplSub->html);
 	}
 
+
+	tpl->out("siteId", siteId);
+	tpl->out("activePages", "class='active'");
 	manager->deleteQuery(query);
 }
 
@@ -112,6 +179,8 @@ void BuilderModule::paintWidgets(int siteId, WebTemplate *tpl) {
 		tpl->out("widgets", "<tr><td>" + (String)(i + 1) + "</td><td>" + tag + "</td><td>" + name + "</td></tr>");
 	}
 
+	tpl->out("siteId", siteId);
+	tpl->out("activeWidgets", "class='active'");
 	manager->deleteQuery(query);
 }
 
@@ -120,31 +189,20 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 	WebTemplate *tpl = new WebTemplate();
 	String tplName = "edit_tpl.html";
 	if (tpl->open(manager->modulePath + "/builder/" + tplName)) {
-		paintModules(tpl);
 		int siteId = request.header.GET.getValue("p3").toInt();
-		paintPages(siteId, tpl);
-		paintWidgets(siteId, tpl);
+		String tabs = request.header.GET.getValue("p4");
 
-		String sql = "select * from sites where id='" + (String)siteId + "' and deleted=0 order by id";
-		int count = query->active(sql);
-		if (count > 0) {
-			String url = query->getFieldValue(0, "url");
-			String urlView = query->getFieldValue(0, "urlView");
-			String name = query->getFieldValue(0, "name");
-			String about = query->getFieldValue(0, "about");
-			String keywords = query->getFieldValue(0, "keywords");
-			tpl->out("siteId", siteId);
-			tpl->out("url", url);
-			tpl->out("urlView", urlView);
-			tpl->out("name", name);
-			tpl->out("about", about);
-			tpl->out("keywords", keywords);
-
-			String p4 = request.header.GET.getValue("p4");
-			if (p4 == "") tpl->out("in0", "in");
-			else if (p4 == "pages") tpl->out("in1", "in");
-			else if (p4 == "widgets") tpl->out("in2", "in");
+		String sql = "select url from sites where id='" + (String)siteId + "'";
+		if (query->active(sql) > 0) {
+			String siteUrl = query->getFieldValue(0, "url");
+			tpl->out("url", siteUrl);
 		}
+
+		if (tabs == "") paintParams(siteId, tpl);
+		else if (tabs == "design") paintDesign(siteId, tpl);
+		else if (tabs == "pages") paintPages(siteId, tpl);
+		else if (tabs == "widgets") paintWidgets(siteId, tpl);
+
 		tpl->exec();
 		page->out("content", tpl->html);
 	}
@@ -185,6 +243,7 @@ void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	else if (p2 == "addPage") ajaxAddPage(page, request);
 	else if (p2 == "getModuleUrl") ajaxGetModuleUrl(page, request);
 	else if (p2 == "accept") ajaxAccept(page, request);
+	else if (p2 == "acceptDesign") ajaxAcceptDesign(page, request);
 	else if (p2 == "editPage") ajaxEditPage(page, request);
 	else if (p2 == "deletePage") ajaxDeletePage(page, request);
 	else if (p2 == "getPageId") ajaxGetPageId(page, request);
@@ -419,16 +478,29 @@ void BuilderModule::ajaxAccept(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 
 	int siteId = request.header.POST.getValue("siteId").toInt();
-	String url = request.header.POST.getValue("url");
 	String name = request.header.POST.getValue("name");
 	String about = request.header.POST.getValue("about");
 	String caption = request.header.POST.getValue("caption");
+
+	String sql = "update sites set name='" + name + "', about='" + about + "', caption='" + caption + "' where id='" + (String)siteId + "'";
+
+	if (query->exec(sql)) {
+		page->tplIndex->out("out", "<note>\n");
+		page->tplIndex->out("out", "<result>1</result>\n");
+		page->tplIndex->out("out", "</note>\n");
+	}
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxAcceptDesign(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
 	int design = request.header.POST.getValue("desing").toInt();
 	int theme = request.header.POST.getValue("theme").toInt();
-	int layout = request.header.POST.getValue("maket").toInt();
+	int layout = request.header.POST.getValue("layout").toInt();
 
-	String sql = "update sites set url='" + url + "', name='" + name + "', about='" + about + "', caption='" + caption + "', design='" + design + 
-		"', theme='" + theme + "', layout='" + layout + "' where id='" + (String)siteId + "'";
+	String sql = "update sites set design='" + (String)design + "', theme='" + (String)theme + "', layout='" + (String)layout + "' where id='" + (String)siteId + "'";
 
 	if (query->exec(sql)) {
 		page->tplIndex->out("out", "<note>\n");

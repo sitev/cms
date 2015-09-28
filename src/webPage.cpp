@@ -67,11 +67,23 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		tplIndex->clearTag("sidebar");
 		tplIndex->clearTag("sidebar2");
 		tplIndex->clearTag("caption");
+		tplIndex->clearTag("theme");
 
 		MySQL *query = site->manager->newQuery();
-		String sql = "select caption from sites where id='" + (String)site->siteId + "'";
+		String sql = "select theme, caption from sites where id='" + (String)site->siteId + "'";
 		if (query->active(sql)) {
+			int theme = query->getFieldValue(0, "theme").toInt();
 			String caption = query->getFieldValue(0, "caption");
+
+			String sTheme = "/css/";
+			if (theme > 0) {
+				sql = "select theme from themes where id='" + (String)theme + "'";
+				if (query->active(sql) > 0) {
+					sTheme = query->getFieldValue(0, "theme");
+					sTheme = "https://bootswatch.com/" + sTheme + "/";
+				}
+			}
+			tplIndex->out("theme", sTheme);
 			tplIndex->out("caption", caption);
 		}
 

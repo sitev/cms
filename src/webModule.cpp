@@ -59,7 +59,6 @@ void WebModule::paint404(WebPage *page, HttpRequest &request) {
 }
 
 
-
 //---------------------------------------------------------------------------------------------------
 //----------      class StaticPageModule     --------------------------------------------------------
 //---------------------------------------------------------------------------------------------------
@@ -70,7 +69,7 @@ StaticPageModule::StaticPageModule(SiteManager *manager) : WebModule(manager) {
 void StaticPageModule::paint(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 
-	String sql = "select txt.value from data d, dataText txt where d.dataId=txt.id and d.pageId='" + (String)page->pageId + "'";
+	String sql = "select txt.value from data d, dataText txt where d.dataId=txt.id and d.pageId='" + (String)page->pageId + "' order by txt.id desc";
 	printf("sql = %s\n", sql.to_string().c_str());
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
