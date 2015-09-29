@@ -166,6 +166,31 @@ void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 	manager->deleteQuery(query);
 }
 
+void BuilderModule::paintMenu(int siteId, WebTemplate *tpl) {
+	MySQL *query = manager->newQuery();
+
+	String tplPath = manager->modulePath + "/builder/editMenu_tpl.html";
+	WebTemplate *tplSub = new WebTemplate();
+	if (tplSub->open(tplPath)) {
+		paintModules(tplSub);
+		String sql = "select * from menu where siteId='" + (String)siteId + "' order by sorting, id";
+		int count = query->active(sql);
+		for (int i = 0; i < count; i++) {
+			String name = query->getFieldValue(i, "name");
+			String url = query->getFieldValue(i, "url");
+
+			tplSub->out("items", "<tr><td>" + name + "</td><td>" + url + "</td></tr>");
+		}
+
+		tplSub->exec();
+		tpl->out("out", tplSub->html);
+	}
+
+	tpl->out("siteId", siteId);
+	tpl->out("activeMenu", "class='active'");
+	manager->deleteQuery(query);
+}
+
 void BuilderModule::paintWidgets(int siteId, WebTemplate *tpl) {
 	MySQL *query = manager->newQuery();
 
@@ -201,6 +226,7 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 		if (tabs == "") paintParams(siteId, tpl);
 		else if (tabs == "design") paintDesign(siteId, tpl);
 		else if (tabs == "pages") paintPages(siteId, tpl);
+		else if (tabs == "menu") paintMenu(siteId, tpl);
 		else if (tabs == "widgets") paintWidgets(siteId, tpl);
 
 		tpl->exec();
@@ -249,6 +275,7 @@ void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	else if (p2 == "getPageId") ajaxGetPageId(page, request);
 	else if (p2 == "saveContent") ajaxSaveContent(page, request);
 	else if (p2 == "moveTableRow") ajaxMoveTableRow(page, request);
+	else if (p2 == "addMenuItem") ajaxAddMenuItem(page, request);
 }
 
 void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
@@ -652,5 +679,30 @@ void BuilderModule::ajaxMoveTableRow(WebPage *page, HttpRequest &request) {
 	manager->deleteQuery(query);
 }
 
+void BuilderModule::ajaxAddMenuItem(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	String name = request.header.POST.getValue("name");
+	String url = request.header.POST.getValue("url");
+
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = manager->getUserId(uuid);
+
+	page->tplIndex->out("out", "<note>\n");
+	if (siteId > 0) {
+		String sql = "select max(sorting) ms from menu where siteId='" + (String)siteId + "' and deleted=0 order by sorting, id";
+		if (query->active(sql) > 0) {
+			int sorting = query->getFieldValue(0, "ms").toInt() + 1;
+
+			sql = "insert into menu (siteId, sorting, name, url) values('" + (String)siteId + "', '" + (String)sorting + "', '" + name + "', '" + url + "')";
+			string sql8 = sql.to_string();
+			if (query->exec(sql)) {
+				page->tplIndex->out("out", "<result>1</result>\n");
+			}
+		}
+	}
+	page->tplIndex->out("out", "</note>\n");
+	manager->deleteQuery(query);
+}
 
 }

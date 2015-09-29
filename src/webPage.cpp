@@ -60,6 +60,8 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 			fn = site->manager->documentRoot + "/common/index_tpl.html";
 		}
 
+		string fn8 = fn.to_string();
+
 		tplIndex->clearTag("title");
 		tplIndex->clearTag("keywords");
 		tplIndex->clearTag("description");
@@ -70,9 +72,11 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		tplIndex->clearTag("theme");
 
 		MySQL *query = site->manager->newQuery();
-		String sql = "select theme, caption from sites where id='" + (String)site->siteId + "'";
+		String sql = "select theme, layout, caption from sites where id='" + (String)site->siteId + "'";
 		if (query->active(sql)) {
 			int theme = query->getFieldValue(0, "theme").toInt();
+			int layout = query->getFieldValue(0, "layout").toInt();
+			if (layout > 0) fn = site->manager->documentRoot + "/design/1/layout" + (String)layout + "_tpl.html";
 			String caption = query->getFieldValue(0, "caption");
 
 			String sTheme = "/css/";
