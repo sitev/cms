@@ -189,6 +189,67 @@ void SiteManager::setMainPage(int siteId, int pageId) {
 	}
 }
 
+void SiteManager::paintItem(int siteId, int itemId, WebTemplate *tpl) {
+	MySQL *query = newQuery();
+
+	//String sql = "select * from menu where isnull(deleted) and parent='" + (String)itemId + "' and siteId='" + (String)siteId + "' order by sorting, id";
+	String sql = "select * from menu where isnull(deleted) and parent='" + (String)itemId + "' and siteId='" + (String)siteId + "' order by sorting, id";
+	//String sql = "select parent.id, parent.name, parent.url, not isnull(child.name) as havechild from menu as parent left join menu as child on child.parent = parent.id where parent.parent='" + (String)itemId + "' order by parent.sorting, parent.id";
+	string sql8 = sql.to_string();
+	int count = query->active(sql);
+
+	for (int i = 0; i < count; i++) {
+		int itemId = query->getFieldValue(i, "id").toInt();
+		String name = query->getFieldValue(i, "name");
+		String url = query->getFieldValue(i, "url");
+		bool haveChild = query->getFieldValue(i, "havechild").toInt();
+		i++;
+
+		if (haveChild) {
+			tpl->out("menu", "<li class='dropdown-submenu'><a href='#' class='dropdown-toggle' data-toggle='dropdown'>Dropdown</a>\r\n");
+			tpl->out("menu", "<ul class='dropdown-menu'>\r\n");
+
+			paintItem(siteId, itemId, tpl);
+
+			tpl->out("menu", "</ul>\r\n");
+			tpl->out("menu", "</li>\r\n");
+		}
+		else {
+			tpl->out("menu", "<li><a href='/" + url + "'>" + name + "</a></li>\r\n");
+		}
+	}
+	deleteQuery(query);
+}
+
+void SiteManager::paintMainMenu(int siteId, WebTemplate *tpl) {
+	MySQL *query = newQuery();
+
+	//String sql = "select parent.id, parent.name, parent.url, not isnull(child.name) as havechild from menu as parent left join menu as child on child.parent = parent.id where isnull(parent.level) order by parent.sorting, parent.id";
+
+	String sql = "select * from menu where isnull(deleted) and isnull(parent) and siteId='" + (String)siteId + "' order by sorting, id";
+	int count = query->active(sql);
+	for (int i = 0; i < count; i++) {
+		int itemId = query->getFieldValue(i, "id").toInt();
+		String name = query->getFieldValue(i, "name");
+		String url = query->getFieldValue(i, "url");
+		bool haveChild = query->getFieldValue(i, "havechild").toInt();
+
+		if (haveChild) {
+			tpl->out("menu", "<li class='dropdown'><a href='#' class='dropdown-toggle' data-toggle='dropdown'>" + name + "<b class='caret'></b></a>\r\n");
+			tpl->out("menu", "<ul class='dropdown-menu'>\r\n");
+
+			paintItem(siteId, itemId, tpl);
+
+			tpl->out("menu", "</ul>\r\n");
+			tpl->out("menu", "</li>\r\n");
+		}
+		else {
+			tpl->out("menu", "<li><a href='/" + url + "'>" + name + "</a></li>\r\n");
+		}
+	}
+	deleteQuery(query);
+}
+
 void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 	string host = request.header.getValue("Host").to_string();
 	printf("host = %s\n", host.c_str());

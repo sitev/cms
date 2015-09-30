@@ -46,6 +46,10 @@ public:
 	virtual void ajaxMoveTableRow(WebPage *page, HttpRequest &request);
 
 	virtual void ajaxAddMenuItem(WebPage *page, HttpRequest &request);
+	virtual void ajaxAddChildMenuItem(WebPage *page, HttpRequest &request);
+	virtual void ajaxEditMenuItem(WebPage *page, HttpRequest &request);
+	virtual void ajaxDeleteMenuItem(WebPage *page, HttpRequest &request);
+	virtual void ajaxItemMoveTableRow(WebPage *page, HttpRequest &request);
 };
 
 }

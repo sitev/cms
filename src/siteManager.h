@@ -36,6 +36,8 @@ public:
 	virtual void addPage(int siteId, int pageId, string url, int moduleId);
 	virtual void setMainPage(WebSite *site, int pageId);
 	virtual void setMainPage(int siteId, int pageId);
+	virtual void paintItem(int siteId, int itemId, WebTemplate *tpl);
+	virtual void paintMainMenu(int siteId, WebTemplate *tpl);
 	virtual void paintPage(HttpRequest &request, HttpResponse &response);
 
 	String generateUserPassword();

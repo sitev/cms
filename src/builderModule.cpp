@@ -173,11 +173,15 @@ void BuilderModule::paintMenu(int siteId, WebTemplate *tpl) {
 	WebTemplate *tplSub = new WebTemplate();
 	if (tplSub->open(tplPath)) {
 		paintModules(tplSub);
-		String sql = "select * from menu where siteId='" + (String)siteId + "' order by sorting, id";
+		String sql = "select * from menu where isnull(deleted) and siteId='" + (String)siteId + "' order by sorting, id";
 		int count = query->active(sql);
 		for (int i = 0; i < count; i++) {
 			String name = query->getFieldValue(i, "name");
 			String url = query->getFieldValue(i, "url");
+			int level = query->getFieldValue(i, "level").toInt();
+			if (name == "") name = "&nbsp;";
+
+			for (int i = 0; i < level; i++) name = "... " + name;
 
 			tplSub->out("items", "<tr><td>" + name + "</td><td>" + url + "</td></tr>");
 		}
@@ -275,7 +279,12 @@ void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	else if (p2 == "getPageId") ajaxGetPageId(page, request);
 	else if (p2 == "saveContent") ajaxSaveContent(page, request);
 	else if (p2 == "moveTableRow") ajaxMoveTableRow(page, request);
+
 	else if (p2 == "addMenuItem") ajaxAddMenuItem(page, request);
+	else if (p2 == "addChildMenuItem") ajaxAddChildMenuItem(page, request);
+	else if (p2 == "editMenuItem") ajaxEditMenuItem(page, request);
+	else if (p2 == "deleteMenuItem") ajaxDeleteMenuItem(page, request);
+	else if (p2 == "itemMoveTableRow") ajaxItemMoveTableRow(page, request);
 }
 
 void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
@@ -690,7 +699,7 @@ void BuilderModule::ajaxAddMenuItem(WebPage *page, HttpRequest &request) {
 
 	page->tplIndex->out("out", "<note>\n");
 	if (siteId > 0) {
-		String sql = "select max(sorting) ms from menu where siteId='" + (String)siteId + "' and deleted=0 order by sorting, id";
+		String sql = "select max(sorting) ms from menu where isnull(deleted) and siteId='" + (String)siteId + "' and deleted=0 order by sorting, id";
 		if (query->active(sql) > 0) {
 			int sorting = query->getFieldValue(0, "ms").toInt() + 1;
 
@@ -702,6 +711,131 @@ void BuilderModule::ajaxAddMenuItem(WebPage *page, HttpRequest &request) {
 		}
 	}
 	page->tplIndex->out("out", "</note>\n");
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxAddChildMenuItem(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int itemIndex = request.header.POST.getValue("itemIndex").toInt();
+	String name = request.header.POST.getValue("name");
+	String url = request.header.POST.getValue("url");
+
+	String uuid = request.header.COOKIE.getValue("uuid");
+	int userId = manager->getUserId(uuid);
+
+	int itemId = 0, level = 0;
+	String sql = "select * from menu where isnull(deleted) and siteId='" + (String)siteId + "' order by sorting, id";
+	int count = query->active(sql);
+	for (int i = 0; i < count; i++) {
+		if (itemIndex == i) {
+			itemId = query->getFieldValue(i, "id").toInt();
+			level = query->getFieldValue(i, "level").toInt();
+			break;
+		}
+	}
+
+	page->tplIndex->out("out", "<note>\n");
+	if (siteId > 0) {
+		String sql = "select max(sorting) ms from menu where isnull(deleted) and siteId='" + (String)siteId + "' and deleted=0 order by sorting, id";
+		if (query->active(sql) > 0) {
+			int sorting = query->getFieldValue(0, "ms").toInt() + 1;
+			level++;
+
+			sql = "insert into menu (siteId, sorting, name, url, parent, level) values('" + (String)siteId + "', '" + (String)sorting + "', '" + 
+				name + "', '" + url + "', '" + (String)itemId + "', '" + (String)level + "')";
+			string sql8 = sql.to_string();
+			if (query->exec(sql)) {
+				page->tplIndex->out("out", "<result>1</result>\n");
+			}
+		}
+	}
+	page->tplIndex->out("out", "</note>\n");
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxEditMenuItem(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int itemIndex = request.header.POST.getValue("itemIndex").toInt();
+	int itemId = 0;
+
+	String name = request.header.POST.getValue("name");
+	String url = request.header.POST.getValue("url");
+
+	String sql = "select * from menu where isnull(deleted) and siteId='" + (String)siteId + "' order by sorting, id limit " + (String)itemIndex + ", 1";
+	int count = query->active(sql);
+	if (count > 0) {
+		itemId = query->getFieldValue(0, "id").toInt();
+	}
+
+	if (itemId > 0) {
+		sql = "update menu set name='" + name + "', url='" + url + "' where siteId='" + (String)siteId + "' and id='" + (String)itemId + "'";
+		string sql8 = sql.to_string();
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<note>\n");
+			page->tplIndex->out("out", "<result>1</result>\n");
+			page->tplIndex->out("out", "</note>\n");
+		}
+	}
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxDeleteMenuItem(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int itemIndex = request.header.POST.getValue("itemIndex").toInt();
+	int itemId = 0;
+
+	String sql = "select * from menu where isnull(deleted) and siteId='" + (String)siteId + "' order by sorting, id limit " + (String)itemIndex + ", 1";
+	int count = query->active(sql);
+	if (count > 0) {
+		itemId = query->getFieldValue(0, "id").toInt();
+	}
+
+	if (itemId > 0) {
+		sql = "update menu set deleted=1 where siteId='" + (String)siteId + "' and id='" + (String)itemId + "'";
+		string sql8 = sql.to_string();
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<note>\n");
+			page->tplIndex->out("out", "<result>1</result>\n");
+			page->tplIndex->out("out", "</note>\n");
+		}
+	}
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxItemMoveTableRow(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int index1 = request.header.POST.getValue("index1").toInt();
+	int index2 = request.header.POST.getValue("index2").toInt();
+
+	String sql = "select max(sorting) ms from menu where isnull(deleted) and siteId='" + (String)siteId + "' and deleted=0 order by sorting, id";
+	if (query->active(sql)) {
+		int count = query->getRowCount();
+		int rowId1 = -1, rowId2 = -1;
+		int sorting1 = 1, sorting2 = 1;
+		for (int i = 0; i < count; i++) {
+			if (index1 == i) {
+				rowId1 = query->getFieldValue(i, "id").toInt();
+				sorting1 = query->getFieldValue(i, "sorting").toInt();
+			}
+			if (index2 == i) {
+				rowId2 = query->getFieldValue(i, "id").toInt();
+				sorting2 = query->getFieldValue(i, "sorting").toInt();
+			}
+		}
+
+		sql = "update menu set sorting='" + (String)sorting2 + "' where id='" + (String)rowId1 + "'";
+		query->exec(sql);
+
+		sql = "update menu set sorting='" + (String)sorting1 + "' where id='" + (String)rowId2 + "'";
+		query->exec(sql);
+	}
+
 	manager->deleteQuery(query);
 }
 

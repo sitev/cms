@@ -69,6 +69,7 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		tplIndex->clearTag("sidebar");
 		tplIndex->clearTag("sidebar2");
 		tplIndex->clearTag("caption");
+		tplIndex->clearTag("menu");
 		tplIndex->clearTag("theme");
 
 		MySQL *query = site->manager->newQuery();
@@ -91,8 +92,9 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 			tplIndex->out("caption", caption);
 		}
 
+		//paintMenu();
+		site->manager->paintMainMenu(site->siteId, tplIndex);
 		this->module->paint(this, request);
-
 		site->manager->widgetManager.paintPageWidgets(this);
 
 		String uuid = request.header.COOKIE.getValue("uuid");
