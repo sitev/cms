@@ -17,7 +17,10 @@ public:
 	virtual void paintParams(int siteId, WebTemplate *tpl);
 	virtual void paintDesign(int siteId, WebTemplate *tpl);
 	virtual void paintPages(int siteId, WebTemplate *tpl);
+	virtual void paintMenuItem(int siteId, int parentId, WebTemplate *tpl);
 	virtual void paintMenu(int siteId, WebTemplate *tpl);
+
+	virtual void paintWidgetTypes(WebTemplate *tpl);
 	virtual void paintWidgets(int siteId, WebTemplate *tpl);
 
 	virtual void paintSitesEdit(WebPage *page, HttpRequest &request);
@@ -50,6 +53,9 @@ public:
 	virtual void ajaxEditMenuItem(WebPage *page, HttpRequest &request);
 	virtual void ajaxDeleteMenuItem(WebPage *page, HttpRequest &request);
 	virtual void ajaxItemMoveTableRow(WebPage *page, HttpRequest &request);
+
+	virtual void ajaxAddWidget(WebPage *page, HttpRequest &request);
+	virtual void ajaxEditWidget(WebPage *page, HttpRequest &request);
 };
 
 }

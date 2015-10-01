@@ -203,10 +203,9 @@ void SiteManager::paintItem(int siteId, int itemId, WebTemplate *tpl) {
 		String name = query->getFieldValue(i, "name");
 		String url = query->getFieldValue(i, "url");
 		bool haveChild = query->getFieldValue(i, "havechild").toInt();
-		i++;
 
 		if (haveChild) {
-			tpl->out("menu", "<li class='dropdown-submenu'><a href='#' class='dropdown-toggle' data-toggle='dropdown'>Dropdown</a>\r\n");
+			tpl->out("menu", "<li class='dropdown-submenu'><a href='#' class='dropdown-toggle' data-toggle='dropdown'>" + name + "</a>\r\n");
 			tpl->out("menu", "<ul class='dropdown-menu'>\r\n");
 
 			paintItem(siteId, itemId, tpl);
