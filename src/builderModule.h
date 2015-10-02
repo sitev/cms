@@ -25,6 +25,8 @@ public:
 
 	virtual void paintSitesEdit(WebPage *page, HttpRequest &request);
 	virtual void paintEditContent(WebPage *page, HttpRequest &request);
+	virtual void paintEditWidgetContent(WebPage *page, HttpRequest &request);
+
 
 	virtual void ajax(WebPage *page, HttpRequest &request);
 	virtual void ajaxCreateSite(WebPage *page, HttpRequest &request);
@@ -56,6 +58,9 @@ public:
 
 	virtual void ajaxAddWidget(WebPage *page, HttpRequest &request);
 	virtual void ajaxEditWidget(WebPage *page, HttpRequest &request);
+	virtual void ajaxGetWidgetId(WebPage *page, HttpRequest &request);
+	virtual void ajaxSaveWidgetContent(WebPage *page, HttpRequest &request);
+	virtual void ajaxDeleteWidget(WebPage *page, HttpRequest &request);
 };
 
 }

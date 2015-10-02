@@ -19,6 +19,7 @@ void BuilderModule::paint(WebPage *page, HttpRequest &request) {
 	if (p2 == "") paintMain(page, request);
 	else if (p2 == "edit") paintSitesEdit(page, request);
 	else if (p2 == "editContent") paintEditContent(page, request);
+	else if (p2 == "editWidgetContent") paintEditWidgetContent(page, request);
 }
 
 void BuilderModule::paintMain(WebPage *page, HttpRequest &request) {
@@ -244,7 +245,7 @@ void BuilderModule::paintWidgets(int siteId, WebTemplate *tpl) {
 	if (tplSub->open(tplPath)) {
 		paintWidgetTypes(tplSub);
 
-		String sql = "select w.id, ws.tag, w.name type, ws.name, ws.about from widget_site ws, widget_type w where ws.widgetId=w.id and siteId='" + (String)siteId + "' order by ws.id";
+		String sql = "select w.id, ws.tag, w.name type, ws.name, ws.about from widget_site ws, widget_type w where isnull(deleted) and ws.widgetType=w.id and siteId='" + (String)siteId + "' order by ws.id";
 		int count = query->active(sql);
 		for (int i = 0; i < count; i++) {
 			int widgetId = query->getFieldValue(i, "id").toInt();
@@ -313,6 +314,30 @@ void BuilderModule::paintEditContent(WebPage *page, HttpRequest &request) {
 	}
 }
 
+void BuilderModule::paintEditWidgetContent(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+	int siteId = request.header.GET.getValue("p3").toInt();
+	int widgetId = request.header.GET.getValue("p4").toInt();
+	WebTemplate *tpl = new WebTemplate();
+	String tplName = "editWidgetContent_tpl.html";
+	if (tpl->open(manager->modulePath + "/builder/" + tplName)) {
+		tpl->out("siteId", siteId);
+		tpl->out("widgetId", widgetId);
+
+		//String sql = "select t.value from pages p, data d, dataText t where d.pageid=p.id and d.dataId=t.id and p.id='" + (String)pageId + "'";
+		String sql = "select t.text from widget_site s, widget_text t where t.widgetId=s.id and isnull(deleted) and siteId='" + (String)siteId + "' and s.id='" + (String)widgetId + "' order by sorting, s.id";
+		string sql8 = sql.to_string();
+		int count = query->active(sql);
+		if (count > 0) {
+			String text = query->getFieldValue(0, "text");
+			string text8 = text.to_string();
+			tpl->out("text", text);
+		}
+		tpl->exec();
+		page->out("content", tpl->html);
+	}
+}
+
 void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 	String p2 = request.header.GET.getValue("p2");
 	string p2_8 = p2.to_string();
@@ -339,7 +364,10 @@ void BuilderModule::ajax(WebPage *page, HttpRequest &request) {
 
 	else if (p2 == "addWidget") ajaxAddWidget(page, request);
 	else if (p2 == "editWidget") ajaxEditWidget(page, request);
-
+	else if (p2 == "getWidgetId") ajaxGetWidgetId(page, request);
+	else if (p2 == "saveWidgetContent") ajaxSaveWidgetContent(page, request);
+	else if (p2 == "deleteWidget") ajaxDeleteWidget(page, request);
+	
 }
 
 void BuilderModule::ajaxCreateSite(WebPage *page, HttpRequest &request) {
@@ -927,11 +955,17 @@ void BuilderModule::ajaxAddWidget(WebPage *page, HttpRequest &request) {
 		if (query->active(sql) > 0) {
 			int sorting = query->getFieldValue(0, "ms").toInt() + 1;
 
-			sql = "insert into widget_site (siteId, widgetId, tag, name, about, sorting) values('"
+			sql = "insert into widget_site (siteId, widgetType, tag, name, about, sorting) values('"
 				+ (String)siteId + "', '" + (String)type + "', '" + location + "', '" + name + "', '" + about + "', '" + (String)sorting + "')";
 			string sql8 = sql.to_string();
 			if (query->exec(sql)) {
-				page->tplIndex->out("out", "<result>1</result>\n");
+				bool flag = true;
+				if (type == 1) {
+					int widgetId = query->getLastId();
+					sql = "insert into widget_text (widgetId) values('" + (String)widgetId + "')";
+					if (!query->exec(sql)) flag = false;
+				}
+				if (flag) page->tplIndex->out("out", "<result>1</result>\n");
 			}
 		}
 	}
@@ -958,7 +992,69 @@ void BuilderModule::ajaxEditWidget(WebPage *page, HttpRequest &request) {
 	}
 
 	if (widgetId > 0) {
-		sql = "update widget_site set tag='" + location + "', widgetId='" + type + "', name='" + name + "', about='" + about + "' where siteId='" + (String)siteId + "' and id='" + (String)widgetId + "'";
+		sql = "update widget_site set tag='" + location + "', widgetType='" + type + "', name='" + name + "', about='" + about + "' where siteId='" + (String)siteId + "' and id='" + (String)widgetId + "'";
+		string sql8 = sql.to_string();
+		if (query->exec(sql)) {
+			page->tplIndex->out("out", "<note>\n");
+			page->tplIndex->out("out", "<result>1</result>\n");
+			page->tplIndex->out("out", "</note>\n");
+		}
+	}
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxGetWidgetId(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int widgetIndex = request.header.POST.getValue("widgetIndex").toInt();
+
+	String sql = "select * from widget_site where isnull(deleted) and siteId='" + (String)siteId + "' order by sorting, id limit " + (String)widgetIndex + ", 1";
+	int count = query->active(sql);
+	if (count > 0) {
+		int widgetId = query->getFieldValue(0, "id").toInt();
+
+		page->tplIndex->out("out", "<note>\n");
+		page->tplIndex->out("out", "<result>1</result>\n");
+		page->tplIndex->out("out", "<widgetId>" + (String)widgetId + "</widgetId>\n");
+		page->tplIndex->out("out", "</note>\n");
+	}
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxSaveWidgetContent(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int widgetId = request.header.POST.getValue("widgetId").toInt();
+	String text = request.header.POST.getValue("text");
+	text = request.header.htmlEntitiesDecode(text.to_string());
+
+	String sql = "update widget_text set text='" + text + "' where widgetId='" + (String)widgetId + "'";
+	if (query->exec(sql)) {
+		page->tplIndex->out("out", "<note>\n");
+		page->tplIndex->out("out", "<result>1</result>\n");
+		page->tplIndex->out("out", "</note>\n");
+	}
+
+	manager->deleteQuery(query);
+}
+
+void BuilderModule::ajaxDeleteWidget(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	int siteId = request.header.POST.getValue("siteId").toInt();
+	int widgetIndex = request.header.POST.getValue("widgetIndex").toInt();
+	int widgetId = 0;
+
+	String sql = "select id from widget_site where isnull(deleted) and siteId='" + (String)siteId + "' order by sorting, id limit " + (String)widgetIndex + ", 1";
+	int count = query->active(sql);
+	if (count > 0) {
+		widgetId = query->getFieldValue(0, "id").toInt();
+	}
+
+	if (widgetId > 0) {
+		sql = "update widget_site set deleted=1 where siteId='" + (String)siteId + "' and id='" + (String)widgetId + "'";
 		string sql8 = sql.to_string();
 		if (query->exec(sql)) {
 			page->tplIndex->out("out", "<note>\n");
