@@ -83,7 +83,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\builderModule.cpp" />
     <ClCompile Include="..\..\src\cjCms.cpp" />
-    <ClCompile Include="..\..\src\mainMenu.cpp" />
     <ClCompile Include="..\..\src\siteManager.cpp" />
     <ClCompile Include="..\..\src\userModule.cpp" />
     <ClCompile Include="..\..\src\webModule.cpp" />
@@ -96,7 +95,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\builderModule.h" />
     <ClInclude Include="..\..\src\cjCms.h" />
-    <ClInclude Include="..\..\src\mainMenu.h" />
     <ClInclude Include="..\..\src\siteManager.h" />
     <ClInclude Include="..\..\src\userModule.h" />
     <ClInclude Include="..\..\src\webModule.h" />

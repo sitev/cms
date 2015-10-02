@@ -13,6 +13,12 @@ public:
 	virtual void paint(WebPage *page, String tag) = 0;
 };
 
+class StaticTextWidget {
+public:
+	StaticTextWidget();
+	virtual void paint(WebPage *page, int widgetId, int widgetType, String location, String name, String about);
+};
+
 class WebStudioWidget {
 public:
 	WebStudioWidget();
@@ -50,6 +56,8 @@ public:
 };
 
 class WidgetManager {
+	StaticTextWidget *staticTextWidget;
+
 	WebStudioWidget *webStudioWidget;
 	FreelancersWidget *freelancersWidget;
 	SitevConceptWidget *sitevConceptWidget;
@@ -58,7 +66,7 @@ class WidgetManager {
 	FreeReclameWidget *freeReclameWidget;
 public:
 	WidgetManager();
-	virtual void paintWidget(WebPage *page, String tag, int widgetId);
+	virtual void paintWidget(WebPage *page, int widgetId, int widgetType, String location, String name, String about);
 	virtual void paintPageWidgets(WebPage *page);
 };
 
