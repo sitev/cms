@@ -2,6 +2,7 @@
 #include "cjNetwork.h"
 #include "cjMySQL.h"
 #include "siteManager.h"
+#include "connectionPool.h"
 #include "webSite.h"
 #include "webstudio.h"
 #include "builderModule.h"

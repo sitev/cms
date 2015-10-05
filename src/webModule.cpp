@@ -29,7 +29,6 @@ void WebModule::setOptionsFromDB(int moduleId) {
 				name = query->getFieldValue(0, "name");
 				about = query->getFieldValue(0, "about");
 				url = query->getFieldValue(0, "url");
-				return;
 			}
 		}
 	}

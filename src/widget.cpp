@@ -137,10 +137,16 @@ void WidgetManager::paintPageWidgets(WebPage *page) {
 			String location = query->getFieldValue(i, "tag");
 			String name = query->getFieldValue(i, "name");
 			String about = query->getFieldValue(i, "about");
+			int count1 = page->site->manager->pool.pool.size();
 			paintWidget(page, widgetId, widgetType, location, name, about);
+			int count2 = page->site->manager->pool.pool.size();
+
+			int a = 1;
 		}
 	}
 	page->site->manager->deleteQuery(query);
+
+
 }
 
 }

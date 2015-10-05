@@ -92,7 +92,8 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 			tplIndex->out("caption", caption);
 		}
 
-		//paintMenu();
+		site->manager->deleteQuery(query);
+
 		site->manager->paintMainMenu(site->siteId, tplIndex);
 		this->module->paint(this, request);
 		site->manager->widgetManager.paintPageWidgets(this);

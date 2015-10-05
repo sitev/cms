@@ -93,6 +93,8 @@ void SiteManager::initModules() {
 }
 
 MySQL* SiteManager::newQuery() {
+	return pool.newConnection();
+	/*
 	printf("newQuery();\n");
 	MySQL *query = new MySQL();
 	if (!query->init()) {
@@ -105,10 +107,12 @@ MySQL* SiteManager::newQuery() {
 	}
 	query->exec("SET NAMES utf8");
 	return query;
+	*/
 }
 
 void SiteManager::deleteQuery(MySQL *query) {
-	delete query;
+	pool.deleteConnection(query);
+	//delete query;
 }
 
 void SiteManager::initSites() {
@@ -196,7 +200,7 @@ void SiteManager::paintItem(int siteId, int itemId, WebTemplate *tpl) {
 	String sql = "select * from menu where isnull(deleted) and parent='" + (String)itemId + "' and siteId='" + (String)siteId + "' order by sorting, id";
 	//String sql = "select parent.id, parent.name, parent.url, not isnull(child.name) as havechild from menu as parent left join menu as child on child.parent = parent.id where parent.parent='" + (String)itemId + "' order by parent.sorting, parent.id";
 	string sql8 = sql.to_string();
-	int count = query->active(sql);
+	int count= query->active(sql);
 
 	for (int i = 0; i < count; i++) {
 		int itemId = query->getFieldValue(i, "id").toInt();
@@ -296,31 +300,30 @@ String SiteManager::generateUserPassword() {
 String SiteManager::getLogin(String uuid) {
 	MySQL *query = newQuery();
 	String sql = (String)"SELECT * FROM uuid u1, users u2  WHERE u1.uuid='" + uuid + "' and u1.userId=u2.id";
+	String login = "";
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
-			if (count == 0) return "";
-			String login = query->getFieldValue(0, "login");
-			if (login == "") login = query->getFieldValue(0, "email");
-
-			deleteQuery(query);
-			return login;
+			if (count != 0) {
+				login = query->getFieldValue(0, "login");
+				if (login == "") login = query->getFieldValue(0, "email");
+			}
 		}
 	}
 	deleteQuery(query);
-	return "";
+	return login;
 }
 
 int SiteManager::getUserId(String uuid) {
 	MySQL *query = newQuery();
 	String sql = "select * from uuid u1, users u2 where u1.uuid='" + uuid + "' and u1.userId=u2.id";
+	int userId = 0;
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
-			if (count == 0) return 0;
-			int userId = query->getFieldValue(0, "userId").toInt();
-			deleteQuery(query);
-			return userId;
+			if (count != 0) {
+				userId = query->getFieldValue(0, "userId").toInt();
+			}
 		}
 	}
 	deleteQuery(query);

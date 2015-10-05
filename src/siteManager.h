@@ -24,6 +24,7 @@ public:
 	map <string, WebSite*> sites;
 	WidgetManager widgetManager;
 	String documentRoot, modulePath, widgetPath;
+	ConnectionPool pool;
 
 	SiteManager(int port = 80);
 	virtual void threadFunction(Socket *socket);
