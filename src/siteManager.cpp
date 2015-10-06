@@ -327,7 +327,7 @@ int SiteManager::getUserId(String uuid) {
 		}
 	}
 	deleteQuery(query);
-	return 0;
+	return userId;
 }
 
 String SiteManager::isPasswordCorrect(String password) {
