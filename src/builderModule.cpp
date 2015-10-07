@@ -139,7 +139,7 @@ void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 	if (tplSub->open(tplPath)) {
 		paintModules(tplSub);
 		String sql = "select p.id, p.url, p.isMainPage, m.name, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
-			(String)siteId + "' and deleted=0 order by p.sorting, p.id";
+			(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id";
 		int count = query->active(sql);
 		for (int i = 0; i < count; i++) {
 			int pageId = query->getFieldValue(i, "id").toInt();
@@ -536,7 +536,7 @@ void BuilderModule::ajaxAddPage(WebPage *page, HttpRequest &request) {
 	page->tplIndex->out("out", "<note>\n");
 	if (siteId > 0) {
 		String sql = "select max(p.sorting) ms from pages p, modules m where p.moduleId=m.id and siteId='" +
-			(String)siteId + "' and deleted=0 order by p.sorting, p.id";
+			(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id";
 		if (query->active(sql) > 0) {
 			int sorting = query->getFieldValue(0, "ms").toInt() + 1;
 
@@ -644,7 +644,7 @@ void BuilderModule::ajaxEditPage(WebPage *page, HttpRequest &request) {
 	String keywords = request.header.POST.getValue("keywords");
 
 	String sql = "select p.id, p.url, m.name, p.isMainPage, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
-		(String)siteId + "' and deleted=0 order by p.id limit " + (String)pageIndex + ", 1";
+		(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id limit " + (String)pageIndex + ", 1";
 	int count = query->active(sql);
 	if (count > 0) {
 		pageId = query->getFieldValue(0, "id").toInt();
@@ -670,7 +670,7 @@ void BuilderModule::ajaxDeletePage(WebPage *page, HttpRequest &request) {
 	int pageId = 0;
 
 	String sql = "select p.id, p.url, m.name, p.isMainPage, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
-		(String)siteId + "' and deleted=0 order by p.id limit " + (String)pageIndex + ", 1";
+		(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id limit " + (String)pageIndex + ", 1";
 	int count = query->active(sql);
 	if (count > 0) {
 		pageId = query->getFieldValue(0, "id").toInt();
@@ -697,7 +697,7 @@ void BuilderModule::ajaxGetPageId(WebPage *page, HttpRequest &request) {
 	int pageIndex = request.header.POST.getValue("pageIndex").toInt();
 
 	String sql = "select p.id, p.url, m.name, p.isMainPage, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
-		(String)siteId + "' and deleted=0 order by p.id limit " + (String)pageIndex + ", 1";
+		(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id limit " + (String)pageIndex + ", 1";
 	int count = query->active(sql);
 	if (count > 0) {
 		int pageId = query->getFieldValue(0, "id").toInt();
@@ -742,7 +742,7 @@ void BuilderModule::ajaxMoveTableRow(WebPage *page, HttpRequest &request) {
 	int index2 = request.header.POST.getValue("index2").toInt();
 
 	String sql = "select p.id, p.sorting, p.url, m.name, p.isMainPage, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
-		(String)siteId + "' and deleted=0 order by p.sorting, p.id";
+		(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id";
 	if (query->active(sql)) {
 		int count = query->getRowCount();
 		int rowId1 = -1, rowId2 = -1;

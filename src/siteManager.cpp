@@ -120,7 +120,7 @@ void SiteManager::initSites() {
 	MySQL *query = newQuery();
 	MySQL *queryPages = newQuery(); 
 
-	String sql = "select * from sites order by id";
+	String sql = "select * from sites where deleted=0 order by id";
 	if (query->exec(sql)) {
 		if (query->storeResult()) {
 			int count = query->getRowCount();
@@ -130,7 +130,7 @@ void SiteManager::initSites() {
 				string url = query->getFieldValue(i, "url").to_string();
 				WebSite *ws = addSite(siteId, url);
 
-				sql = "select p.url, p.isMainPage, p.id, p.moduleId, m.name from pages p, modules m where p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
+				sql = "select p.url, p.isMainPage, p.id, p.moduleId, m.name from pages p, modules m where p.deleted=0 and p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
 				if (queryPages->exec(sql)) {
 					if (queryPages->storeResult()) {
 						int count = queryPages->getRowCount();
@@ -278,6 +278,8 @@ void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 				page = ws->mainPage->page;
 			}
 
+			int sz = ws->pages.size();
+			LOGGER_OUT("SIZE", sz);
 			WebPage *wp = ws->pages[page];
 			if (wp != NULL) {
 				wp->paint(request, response);
