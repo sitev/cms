@@ -130,7 +130,7 @@ void SiteManager::initSites() {
 				string url = query->getFieldValue(i, "url").to_string();
 				WebSite *ws = addSite(siteId, url);
 
-				sql = "select p.url, p.isMainPage, p.id, p.moduleId, m.name from pages p, modules m where p.deleted=0 and p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
+				sql = "select p.url, p.isMainPage, p.id, p.moduleId, p.design, m.name from pages p, modules m where p.deleted=0 and p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
 				if (queryPages->exec(sql)) {
 					if (queryPages->storeResult()) {
 						int count = queryPages->getRowCount();
@@ -139,8 +139,9 @@ void SiteManager::initSites() {
 							bool isMainPage = queryPages->getFieldValue(i, "isMainPage").toInt();
 							int pageId = queryPages->getFieldValue(i, "id").toInt();
 							int moduleId = queryPages->getFieldValue(i, "moduleId").toInt();
+							String design = queryPages->getFieldValue(i, "design");
 
-							addPage(ws, pageId, url, moduleId);
+							addPage(ws, pageId, url, moduleId, design);
 							if (isMainPage)	setMainPage(ws, pageId);
 						}
 					}
@@ -159,18 +160,18 @@ WebSite* SiteManager::addSite(int siteId, string url) {
 	return ws;
 }
 
-void SiteManager::addPage(WebSite *site, int pageId, string url, int moduleId) {
+void SiteManager::addPage(WebSite *site, int pageId, string url, int moduleId, String design) {
 	WebModule *wm = modules[moduleId];
-	WebPage *wp = new WebPage(site, url, pageId, wm);
+	WebPage *wp = new WebPage(site, url, pageId, wm, design);
 	site->pages.insert(std::pair<string, WebPage*>(url, wp));
 }
 
-void SiteManager::addPage(int siteId, int pageId, string url, int moduleId) {
+void SiteManager::addPage(int siteId, int pageId, string url, int moduleId, String design) {
 	for (auto it = sites.begin(); it != sites.end(); it++)
 	{
 		WebSite *site = it->second;
 		if (site->siteId == siteId) {
-			addPage(site, pageId, url, moduleId);
+			addPage(site, pageId, url, moduleId, design);
 			break;
 		}
 	}
@@ -188,6 +189,23 @@ void SiteManager::setMainPage(int siteId, int pageId) {
 		if (site->siteId == siteId) {
 			WebPage *page = site->getPageById(pageId);
 			site->mainPage = page;
+			break;
+		}
+	}
+}
+
+void SiteManager::setDesignPage(WebSite *site, int pageId, String design) {
+	WebPage *page = site->getPageById(pageId);
+	page->design = design;
+}
+
+void SiteManager::setDesignPage(int siteId, int pageId, String design) {
+	for (auto it = sites.begin(); it != sites.end(); it++)
+	{
+		WebSite *site = it->second;
+		if (site->siteId == siteId) {
+			WebPage *page = site->getPageById(pageId);
+			page->design = design;
 			break;
 		}
 	}

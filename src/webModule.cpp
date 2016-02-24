@@ -57,7 +57,6 @@ void WebModule::paint404(WebPage *page, HttpRequest &request) {
 
 }
 
-
 //---------------------------------------------------------------------------------------------------
 //----------      class StaticPageModule     --------------------------------------------------------
 //---------------------------------------------------------------------------------------------------
@@ -120,6 +119,7 @@ void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 	if (!tplTag->open(manager->modulePath + "/" + url + "/tag_tpl.html")) return;
 
 	MySQL *query = manager->newQuery();
+	MySQL *query2 = manager->newQuery();
 
 	String sql = "select count(*) cnt from dataNews n, data d where not isnull(num) and d.dataId=n.id and d.pageId='" + (String)page->pageId + "' and d.moduleId='" + (String)moduleId + "' order by dt desc";
 	int newsCount = 0;
@@ -148,6 +148,14 @@ void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 				String tag4 = query->getFieldValue(i, "tag4");
 				String tag5 = query->getFieldValue(i, "tag5");
 
+				int commentCount = 0;
+				sql = "select c.dt, c.comment, u.login from comments c, users u where u.id=c.userId and newsId='" + (String)id + "' order by c.id";
+				if (query2->exec(sql)) {
+					if (query2->storeResult()) {
+						commentCount = query2->getRowCount();
+					}
+				}
+
 				WebTemplate *tpli = tplItem;
 				if (i + 1 == count) tpli = tplLast;
 				tpli->clearAllTags();
@@ -160,6 +168,7 @@ void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 				tpli->out("about", about);
 				tpli->out("text", text);
 				tpli->out("host", page->site->host);
+				tpli->out("commentCount", commentCount);
 
 				tplTag->clearAllTags();
 				tplTag->out("tag1", tag1);
@@ -229,6 +238,9 @@ void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 	tpl->out("caption", caption);
 	tpl->exec();
 	page->out("content", tpl->html);
+
+	manager->deleteQuery(query2);
+	manager->deleteQuery(query);
 }
 
 void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String num) {
@@ -242,7 +254,7 @@ void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String n
 		if (query->storeResult()) {
 			int count = query->getRowCount();
 			if (count > 0) {
-				WebTemplate * tpl = new WebTemplate();
+				WebTemplate *tpl = new WebTemplate();
 				if (tpl->open(manager->modulePath + "/" + url + "/view_tpl.html")) {
 					String dt = query->getFieldValue(0, "dt");
 					dt = dtRus(dt, 0);
@@ -260,11 +272,12 @@ void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String n
 
 					paintTags(page, num, tpl);
 
+					int rowCount = 0;
 					sql = "select c.dt, c.comment, u.login from comments c, users u where u.id=c.userId and newsId='" + (String)newsId + "' order by c.id";
 					if (query->exec(sql)) {
 						if (query->storeResult()) {
-							int count = query->getRowCount();
-							for (int i = 0; i < count; i++) {
+							rowCount = query->getRowCount();
+							for (int i = 0; i < rowCount; i++) {
 								String dt = query->getFieldValue(i, "dt");
 								String comment = query->getFieldValue(i, "comment");
 								String login = query->getFieldValue(i, "login");
@@ -280,6 +293,8 @@ void NewsModule::paintNewsItemView(WebPage *page, HttpRequest &request, String n
 							}
 						}
 					}
+					tpl->out("commentCount", rowCount);
+
 					WebTemplate * tplSendComment = new WebTemplate();
 					if (userId != 0) {
 						if (tplSendComment->open(manager->modulePath + "/" + url + "/sendComment_tpl.html")) {
@@ -370,8 +385,13 @@ void NewsModule::ajax(WebPage *page, HttpRequest &request) {
 	String func = request.header.GET.getValue("p2");
 	String uuid = request.header.COOKIE.getValue("uuid");
 
+	page->tplIndex->out("out", "<note>\n");
+
 	string url8 = url.to_string();
-	if (obj == url) {
+	page->tplIndex->out("out", "<obj>" + obj + "</obj>\n");
+	page->tplIndex->out("out", "<url>" + url + "</url>\n");
+	//if (obj == url)
+	{
 		if (func == "sendComment") {
 			String comment = request.header.POST.getValue("comment");
 			int newsId = request.header.POST.getValue("newsId").toInt();
@@ -383,9 +403,8 @@ void NewsModule::ajax(WebPage *page, HttpRequest &request) {
 				result = "1";
 			}
 
-			page->tplIndex->out("out", "<note>\n");
 			page->tplIndex->out("out", "<result>" + result + "</result>\n");
-			page->tplIndex->out("out", "</note>\n");
+			page->tplIndex->out("out", "<sql>" + sql + "</sql>\n");
 		}
 		if (func == "sendPost") {
 			String name = request.header.POST.getValue("name");
@@ -410,12 +429,11 @@ void NewsModule::ajax(WebPage *page, HttpRequest &request) {
 				else result = "3";
 			}
 			else result = "2";
-			page->tplIndex->out("out", "<note>\n");
 			page->tplIndex->out("out", "<result>" + result + "</result>\n");
 			page->tplIndex->out("out", "<sql>" + sql + "</sql>\n");
-			page->tplIndex->out("out", "</note>\n");
 		}
 	}
+	page->tplIndex->out("out", "</note>\n");
 	manager->deleteQuery(query);
 }
 

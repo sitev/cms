@@ -7,11 +7,12 @@ namespace cj {
 //----------          class WebPage          -------------------------------------------------------
 //--------------------------------------------------------------------------------------------------
 
-WebPage::WebPage(WebSite *site, string page, int pageId, WebModule *module) {
+WebPage::WebPage(WebSite *site, string page, int pageId, WebModule *module, String design) {
 	this->site = site;
 	this->page = page;
 	this->pageId = pageId;
 	this->module = module;
+	this->design = design;
 	moduleId = 0; //0 - никакой модуль не привязан
 	tplIndex = new WebTemplate();
 }
@@ -77,7 +78,7 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		if (query->active(sql)) {
 			int theme = query->getFieldValue(0, "theme").toInt();
 			int layout = query->getFieldValue(0, "layout").toInt();
-			if (layout > 0) fn = site->manager->documentRoot + "/design/1/layout" + (String)layout + "_tpl.html";
+			if (layout > 0) fn = site->manager->documentRoot + "/design/" + (String)site->siteId + "/layout" + (String)layout + "_tpl.html";
 			String caption = query->getFieldValue(0, "caption");
 
 			String sTheme = "/css/";
@@ -88,11 +89,17 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 					sTheme = "https://bootswatch.com/" + sTheme + "/";
 				}
 			}
-			tplIndex->out("theme", sTheme);
+			if (design != "") {
+				fn = site->manager->documentRoot + "/design/" + (String)site->siteId + "/" + design + "_tpl.html";
+				tplIndex->out("theme", "/css/");
+			}
+			else tplIndex->out("theme", sTheme);
+
 			tplIndex->out("caption", caption);
 		}
-
 		site->manager->deleteQuery(query);
+
+
 
 		site->manager->paintMainMenu(site->siteId, tplIndex);
 		this->module->paint(this, request);

@@ -33,10 +33,14 @@ public:
 	virtual void initModules();
 	virtual void initSites();
 	virtual WebSite* addSite(int siteId, string url);
-	virtual void addPage(WebSite *site, int pageId, string url, int moduleId);
-	virtual void addPage(int siteId, int pageId, string url, int moduleId);
+	virtual void addPage(WebSite *site, int pageId, string url, int moduleId, String design);
+	virtual void addPage(int siteId, int pageId, string url, int moduleId, String design);
 	virtual void setMainPage(WebSite *site, int pageId);
 	virtual void setMainPage(int siteId, int pageId);
+
+	virtual void setDesignPage(WebSite *site, int pageId, String design);
+	virtual void setDesignPage(int siteId, int pageId, String design);
+
 	virtual void paintItem(int siteId, int itemId, WebTemplate *tpl);
 	virtual void paintMainMenu(int siteId, WebTemplate *tpl);
 	virtual void paintPage(HttpRequest &request, HttpResponse &response);

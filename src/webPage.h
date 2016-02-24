@@ -15,9 +15,10 @@ public:
 	string page;
 	int pageId;
 	int moduleId;
+	String design;
 	WebModule *module;
 	WebTemplate *tplIndex;
-	WebPage(WebSite *site, string page, int pageId, WebModule *module = NULL);
+	WebPage(WebSite *site, string page, int pageId, WebModule *module = NULL, String design = "");
 	virtual void paint(HttpRequest &request, HttpResponse &response);
 
 	virtual void out(String s);
