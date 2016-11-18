@@ -31,9 +31,9 @@ MySQL* ConnectionPool::newConnection() {
 		int a = 1;
 	}
 	oldCount = count;
-	printf("\nHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n");
-	printf("%d\n", count);
-	printf("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n");
+	//printf("\nHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n");
+	//printf("%d\n", count);
+	//printf("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n");
 	if (count == 0) {
 		MySQL *query = init_connect();
 		Connection *conn = new Connection();

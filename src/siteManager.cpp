@@ -5,7 +5,7 @@ namespace cj {
 //--------------------------------------------------------------------------------------------------
 //----------          class SiteManagerHandler          --------------------------------------------
 //--------------------------------------------------------------------------------------------------
-SiteManagerHandler::SiteManagerHandler(SiteManager *manager) {
+SiteManagerHandler::SiteManagerHandler(SiteManager *manager) : WebServerHandler(manager) {
 	this->manager = manager;
 }
 
@@ -39,6 +39,7 @@ SiteManager::SiteManager(int port) : WebServer(port) {
 	documentRoot = "/var/www";
 	modulePath = documentRoot + "/modules";
 	widgetPath = documentRoot + "/widgets";
+	uiPath = documentRoot + "/ui";
 	printf("\nInit all...\n");
 	initModules();
 	initSites();
@@ -89,6 +90,9 @@ void SiteManager::initModules() {
 	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
 
 	wm = new WebStudioModule(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+	wm = new TaskModule(this);
 	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
 }
 
@@ -332,6 +336,22 @@ String SiteManager::getLogin(String uuid) {
 	}
 	deleteQuery(query);
 	return login;
+}
+
+String SiteManager::getEmail(String uuid) {
+	MySQL *query = newQuery();
+	String sql = (String)"SELECT * FROM uuid u1, users u2  WHERE u1.uuid='" + uuid + "' and u1.userId=u2.id";
+	String email = "";
+	if (query->exec(sql)) {
+		if (query->storeResult()) {
+			int count = query->getRowCount();
+			if (count != 0) {
+				email = query->getFieldValue(0, "email");
+			}
+		}
+	}
+	deleteQuery(query);
+	return email;
 }
 
 int SiteManager::getUserId(String uuid) {

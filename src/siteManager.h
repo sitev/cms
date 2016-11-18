@@ -23,7 +23,7 @@ public:
 	map <int, WebModule*> modules;
 	map <string, WebSite*> sites;
 	WidgetManager widgetManager;
-	String documentRoot, modulePath, widgetPath;
+	String documentRoot, modulePath, widgetPath, uiPath;
 	ConnectionPool pool;
 
 	SiteManager(int port = 80);
@@ -47,6 +47,7 @@ public:
 
 	String generateUserPassword();
 	String getLogin(String uuid);
+	String getEmail(String uuid);
 	int getUserId(String uuid);
 	String isPasswordCorrect(String password);
 

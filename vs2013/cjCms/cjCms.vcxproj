@@ -14,6 +14,7 @@
     <ProjectGuid>{12E17978-806B-42AA-B921-F11DC51B9DBA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>cjCms</RootNamespace>
+    <ProjectName>Cms</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -55,6 +56,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -84,7 +86,9 @@
     <ClCompile Include="..\..\src\builderModule.cpp" />
     <ClCompile Include="..\..\src\cjCms.cpp" />
     <ClCompile Include="..\..\src\connectionPool.cpp" />
+    <ClCompile Include="..\..\src\modal.cpp" />
     <ClCompile Include="..\..\src\siteManager.cpp" />
+    <ClCompile Include="..\..\src\taskModule.cpp" />
     <ClCompile Include="..\..\src\userModule.cpp" />
     <ClCompile Include="..\..\src\webModule.cpp" />
     <ClCompile Include="..\..\src\webPage.cpp" />
@@ -97,7 +101,9 @@
     <ClInclude Include="..\..\src\builderModule.h" />
     <ClInclude Include="..\..\src\cjCms.h" />
     <ClInclude Include="..\..\src\connectionPool.h" />
+    <ClInclude Include="..\..\src\modal.h" />
     <ClInclude Include="..\..\src\siteManager.h" />
+    <ClInclude Include="..\..\src\taskModule.h" />
     <ClInclude Include="..\..\src\userModule.h" />
     <ClInclude Include="..\..\src\webModule.h" />
     <ClInclude Include="..\..\src\webPage.h" />
@@ -105,9 +111,6 @@
     <ClInclude Include="..\..\src\webstudio.h" />
     <ClInclude Include="..\..\src\webTemplate.h" />
     <ClInclude Include="..\..\src\widget.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
