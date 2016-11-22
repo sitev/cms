@@ -134,7 +134,7 @@ void SiteManager::initSites() {
 				string url = query->getFieldValue(i, "url").to_string();
 				WebSite *ws = addSite(siteId, url);
 
-				sql = "select p.url, p.isMainPage, p.id, p.moduleId, p.design, m.name from pages p, modules m where p.deleted=0 and p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
+				sql = "select p.url, p.isMainPage, p.id, p.moduleId, p.layout, m.name from pages p, modules m where p.deleted=0 and p.moduleId = m.id and p.siteId='" + (String)siteId + "'";
 				if (queryPages->exec(sql)) {
 					if (queryPages->storeResult()) {
 						int count = queryPages->getRowCount();
@@ -143,7 +143,7 @@ void SiteManager::initSites() {
 							bool isMainPage = queryPages->getFieldValue(i, "isMainPage").toInt();
 							int pageId = queryPages->getFieldValue(i, "id").toInt();
 							int moduleId = queryPages->getFieldValue(i, "moduleId").toInt();
-							String design = queryPages->getFieldValue(i, "design");
+							String design = queryPages->getFieldValue(i, "layout");
 
 							addPage(ws, pageId, url, moduleId, design);
 							if (isMainPage)	setMainPage(ws, pageId);
@@ -260,7 +260,7 @@ void SiteManager::paintMainMenu(int siteId, WebTemplate *tpl) {
 		bool haveChild = query->getFieldValue(i, "havechild").toInt();
 
 		if (haveChild) {
-			tpl->out("menu", "<li class='dropdown'><a href='#' class='dropdown-toggle' data-toggle='dropdown'>" + name + "<b class='caret'></b></a>\r\n");
+			tpl->out("menu", "<li class='dropdown'><a href='#' class='dropdown-toggle' data-toggle='dropdown'>" + name + "</a>\r\n");
 			tpl->out("menu", "<ul class='dropdown-menu'>\r\n");
 
 			paintItem(siteId, itemId, tpl);

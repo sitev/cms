@@ -20,6 +20,8 @@ void BuilderModule::paint(WebPage *page, HttpRequest &request) {
 	else if (p2 == "edit") paintSitesEdit(page, request);
 	else if (p2 == "editContent") paintEditContent(page, request);
 	else if (p2 == "editWidgetContent") paintEditWidgetContent(page, request);
+
+	page->out("javascript", "<script src=\"/js/builderEdit.js\"></script>");
 }
 
 void BuilderModule::paintMain(WebPage *page, HttpRequest &request) {
@@ -113,13 +115,17 @@ void BuilderModule::paintDesign(int siteId, WebTemplate *tpl) {
 	WebTemplate *tplSub = new WebTemplate();
 	if (tplSub->open(tplPath)) {
 
-		String sql = "select theme, layout from sites where id='" + (String)siteId + "' and deleted=0 order by id";
+		String sql = "select design, theme, layout from sites where id='" + (String)siteId + "' and deleted=0 order by id";
 		int count = query->active(sql);
 		if (count > 0) {
+			int design = query->getFieldValue(0, "design").toInt();
 			int theme = query->getFieldValue(0, "theme").toInt();
 			int layout = query->getFieldValue(0, "layout").toInt();
-			tplSub->out("themeChecked" + (String)theme, "checked");
+			tplSub->out("designId", design);
+			tplSub->out("theme" + (String)design + "_" + (String)theme, "checked");
+			tplSub->out("active" + (String)design, "active");
 			tplSub->out("layoutChecked" + (String)layout, "checked");
+			tpl->out("activeDesign", "class='active'");
 		}
 
 		tplSub->exec();
@@ -138,7 +144,7 @@ void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 	WebTemplate *tplSub = new WebTemplate();
 	if (tplSub->open(tplPath)) {
 		paintModules(tplSub);
-		String sql = "select p.id, p.url, p.design, p.isMainPage, m.name, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
+		String sql = "select p.id, p.url, p.layout, p.isMainPage, m.name, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
 			(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id";
 		int count = query->active(sql);
 		for (int i = 0; i < count; i++) {
@@ -275,7 +281,7 @@ void BuilderModule::paintSitesEdit(WebPage *page, HttpRequest &request) {
 		String tabs = request.header.GET.getValue("p4");
 
 		String sql = "select url from sites where id='" + (String)siteId + "'";
-		if (query->active(sql) > 0) {
+ 		if (query->active(sql) > 0) {
 			String siteUrl = query->getFieldValue(0, "url");
 			tpl->out("url", siteUrl);
 		}
@@ -616,7 +622,7 @@ void BuilderModule::ajaxAcceptDesign(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 
 	int siteId = request.header.POST.getValue("siteId").toInt();
-	int design = request.header.POST.getValue("desing").toInt();
+	int design = request.header.POST.getValue("design").toInt();
 	int theme = request.header.POST.getValue("theme").toInt();
 	int layout = request.header.POST.getValue("layout").toInt();
 

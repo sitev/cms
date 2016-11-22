@@ -15,6 +15,7 @@ WebPage::WebPage(WebSite *site, string page, int pageId, WebModule *module, Stri
 	this->design = design;
 	moduleId = 0; //0 - никакой модуль не привязан
 	tplIndex = new WebTemplate();
+	tplLayout = new WebTemplate();
 }
 
 void WebPage::out(String s) {
@@ -23,7 +24,10 @@ void WebPage::out(String s) {
 }
 
 void WebPage::out(String tag, String s) {
-	tplIndex->out(tag, s);
+	if (isLayout && (tag == "content" || tag == "sidebar" || tag == "sidebar2"))
+		tplLayout->out(tag, s);
+	else 
+		tplIndex->out(tag, s);
 }
 
 void WebPage::paint(HttpRequest &request, HttpResponse &response) {
@@ -38,35 +42,68 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		return;
 	}
 
-	String fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
-	printf("fn = %s\n", fn.to_string().c_str());
-	int ret;
-	struct stat buf;
-	if ((ret = stat(fn.to_string().c_str(), &buf)) != 0) {
-		fn = site->manager->documentRoot + "/common/index_tpl.html";
-	}
+	clearAllTags();
+	paintTemplates();
 
-	string fn8 = fn.to_string();
+	site->manager->paintMainMenu(site->siteId, tplIndex);
+	this->module->paint(this, request);
+	site->manager->widgetManager.paintPageWidgets(this);
 
-	tplIndex->clearTag("title");
-	tplIndex->clearTag("keywords");
-	tplIndex->clearTag("description");
-	tplIndex->clearTag("content");
-	tplIndex->clearTag("sidebar");
-	tplIndex->clearTag("sidebar2");
-	tplIndex->clearTag("caption");
-	tplIndex->clearTag("menu");
-	tplIndex->clearTag("theme");
-	tplIndex->clearTag("javascript");
+	String uuid = request.header.COOKIE.getValue("uuid");
+	if (uuid.getLength() < 10) uuid = generateUUID();
+	paintUser(uuid);
 
+	tplLayout->exec();
+	tplIndex->out("content", tplLayout->html);
+	paintStdTags();
+	tplIndex->exec();
+
+	string t8 = tplIndex->html.to_string();
+	int len = t8.length();
+	this->out("HTTP/1.1 200 OK\r\nContent-type: text/html; charset=UTF-8\r\n");
+	this->out("Set-Cookie: uuid=" + uuid + "\r\nContent-Length: " + (String)len + "\r\n\r\n");
+	this->out(tplIndex->html);
+}
+
+void WebPage::paintTemplates() {
+	String fn;
+
+	isLayout = false;
 	MySQL *query = site->manager->newQuery();
-	String sql = "select theme, layout, caption from sites where id='" + (String)site->siteId + "'";
+	String sql = "select s.design, s.theme, s.layout, s.caption, p.layout pageLayout from sites s, pages p where s.id=p.siteId and s.id='" + 
+		(String)site->siteId + "' and p.id='" + (String)pageId + "'";
+	bool flag = false;
 	if (query->active(sql)) {
+		String caption = query->getFieldValue(0, "caption");
+		int design = query->getFieldValue(0, "design").toInt(); // 0 - пользовательский
 		int theme = query->getFieldValue(0, "theme").toInt();
 		int layout = query->getFieldValue(0, "layout").toInt();
-		if (layout > 0) fn = site->manager->documentRoot + "/design/" + (String)site->siteId + "/layout" + (String)layout + "_tpl.html";
-		String caption = query->getFieldValue(0, "caption");
+		int pageLayout = query->getFieldValue(0, "pageLayout").toInt(); // 0 - как у сайта
+		if (pageLayout > 0) layout = pageLayout;
 
+		if (design > 0) {
+			fn = site->manager->documentRoot + "/design/" + (String)design + "/index_tpl.html";
+			if (tplIndex->open(fn)) {
+				if (theme >= 0) {
+					sql = "select theme from themes where designId='" + (String)design + "' and themeId='" + (String)theme + "'";
+					if (query->active(sql) > 0) {
+						String sTheme = query->getFieldValue(0, "theme");
+						tplIndex->out("theme", sTheme);
+					}
+				}
+				else tplIndex->out("theme", "/css/");
+				if (layout > 0) {
+					String fl = site->manager->documentRoot + "/design/" + (String)design + "/layout" + (String)layout + "_tpl.html";
+					tplLayout->clearAllTags();
+					if (tplLayout->open(fl)) {
+						isLayout = true;
+						flag = true;
+					}
+				}
+			}
+		}
+		
+		/*
 		String sTheme = "/css/";
 		if (theme > 0) {
 			sql = "select theme from themes where id='" + (String)theme + "'";
@@ -75,28 +112,62 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 				sTheme = "https://bootswatch.com/" + sTheme + "/";
 			}
 		}
+		*/
+
+		/*
 		if (design != "") {
 			fn = site->manager->documentRoot + "/design/" + (String)site->siteId + "/" + design + "_tpl.html";
 			tplIndex->out("theme", "/css/");
 		}
 		else tplIndex->out("theme", sTheme);
+		*/
 
 		tplIndex->out("caption", caption);
 	}
+	if (!flag) {
+		fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
+		struct stat buf;
+		if ((stat(fn.to_string().c_str(), &buf)) != 0) {
+			fn = site->manager->documentRoot + "/common/index_tpl.html";
+		}
+		string fn8 = fn.to_string();
+
+		tplIndex->open(fn);
+	}
 	site->manager->deleteQuery(query);
+}
 
+void WebPage::paintStdTags() {
+	tplIndex->out("css", "<link href='/css/tabs.css' rel='stylesheet'>");
+	tplIndex->out("css", "<link href='/css/style.css' rel='stylesheet'>");
+	tplIndex->out("css", "<link href=\"/plugin/summernote/summernote.css\" rel=\"stylesheet\">");
+	tplIndex->out("css", "<link href=\"/plugin/jquery-treegrid/css/jquery.treegrid.css\" rel=\"stylesheet\">");
 
+	tplIndex->out("javascript", "<script src='/js/user.js'></script>\n");
+	tplIndex->out("javascript", "<script src='/js/others.js'></script>\n");
 
-	site->manager->paintMainMenu(site->siteId, tplIndex);
-	this->module->paint(this, request);
-	site->manager->widgetManager.paintPageWidgets(this);
+	tplIndex->out("javascript", "<script src=\"/plugin/summernote/summernote.min.js\"></script>");
+	tplIndex->out("javascript", "<script src=\"/plugin/jquery-treegrid/js/jquery.treegrid.js\"></script>");
+	tplIndex->out("javascript", "<script src=\"/plugin/jquery-treegrid/js/jquery.treegrid.bootstrap3.js\"></script>");
 
-	String uuid = request.header.COOKIE.getValue("uuid");
-	string uuid8 = uuid.to_string();
-	if (uuid.getLength() < 10) 
-		uuid = generateUUID();
+	tplIndex->out("javascript", "<script src='/js/common.js'></script>\n");
+}
 
+void WebPage::clearAllTags() {
+	tplIndex->clearTag("title");
+	tplIndex->clearTag("keywords");
+	tplIndex->clearTag("description");
+	tplIndex->clearTag("user");
+	tplIndex->clearTag("content");
+	tplIndex->clearTag("sidebar");
+	tplIndex->clearTag("sidebar2");
+	tplIndex->clearTag("caption");
+	tplIndex->clearTag("menu");
+	tplIndex->clearTag("theme");
+	tplIndex->clearTag("javascript");
+}
 
+void WebPage::paintUser(String uuid) {
 	String login = site->manager->getLogin(uuid);
 
 	WebTemplate *tpl = new WebTemplate();
@@ -109,27 +180,9 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 	}
 	tpl->exec();
 
-	tplIndex->clearTag("user");
 	tplIndex->out("user", tpl->html);
-
-	int count = tplIndex->lstTag.getCount();
-	LOGGER_SCREEN("fn = " + fn);
-	File *f = new File(fn, "rb");
-	String s, t;
-	f->readAll(s);
-
-	tplIndex->exec(s, t);
-
-
-	string t8 = t.to_string();
-	int len = t8.length();
-	this->out("HTTP/1.1 200 OK\r\nContent-type: text/html; charset=UTF-8\r\n");
-	this->out("Set-Cookie: uuid=" + uuid + "\r\nContent-Length: " + (String)len + "\r\n\r\n");
-	this->out(t);
-
-	LOGGER_OUT("DEBUG", t);
-	delete f;
 }
+
 
 void WebPage::paintAjax(HttpRequest &request) {
 	String fn = site->manager->documentRoot + "/common/ajax_tpl.html";
