@@ -146,6 +146,7 @@ void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 		paintModules(tplSub);
 		String sql = "select p.id, p.url, p.layout, p.isMainPage, m.name, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
 			(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id";
+		string sql8 = sql.to_string();
 		int count = query->active(sql);
 		for (int i = 0; i < count; i++) {
 			int pageId = query->getFieldValue(i, "id").toInt();
@@ -645,27 +646,31 @@ void BuilderModule::ajaxEditPage(WebPage *page, HttpRequest &request) {
 
 	String url = request.header.POST.getValue("url");
 	int moduleId = request.header.POST.getValue("moduleId").toInt();
-	String design = request.header.POST.getValue("design");
+	String layout = request.header.POST.getValue("layout");
 	String title = request.header.POST.getValue("title");
 	String description = request.header.POST.getValue("description");
 	String keywords = request.header.POST.getValue("keywords");
 
-	String sql = "select p.id, p.url, m.name, p.design, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
+	//String sql = "select p.id, p.url, m.name, p.layout, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
+	//	(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id limit " + (String)pageIndex + ", 1";
+	String sql = "select p.id, p.url, p.layout, p.isMainPage, m.name, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
 		(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id limit " + (String)pageIndex + ", 1";
+	string sql8 = sql.to_string();
 	int count = query->active(sql);
 	if (count > 0) {
 		pageId = query->getFieldValue(0, "id").toInt();
 	}
 
 	if (pageId > 0) {
-		sql = "update pages set url='" + url + "', moduleId='" + (String)moduleId + "', design='" + (String)design +
+		sql = "update pages set url='" + url + "', moduleId='" + (String)moduleId + "', layout='" + (String)layout +
 			"', title='" + title + "', description='" + description + "', keywords='" + keywords + "' where siteId='" + (String)siteId + "' and id='" + (String)pageId + "'";
+		string sql8 = sql.to_string();
 		if (query->exec(sql)) {
 			page->tplIndex->out("out", "<note>\n");
 			page->tplIndex->out("out", "<result>1</result>\n");
 			page->tplIndex->out("out", "</note>\n");
 		}
-		manager->setDesignPage(siteId, pageId, design);
+		manager->setDesignPage(siteId, pageId, layout);
 	}
 	manager->deleteQuery(query);
 }

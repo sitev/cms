@@ -23,7 +23,7 @@ void TaskModule::paint(WebPage *page, HttpRequest &request) {
 
 	String sql = "select value from user_params where userId='" + (String)userId + "' and paramId=1";
 	int count = query->active(sql);
-	whoseTasks = 0;
+	whoseTasks = 1;
 	if (count > 0) whoseTasks = query->getFieldValue(0, "value").toInt();
 	
 	manager->deleteQuery(query);
@@ -327,7 +327,7 @@ void TaskModule::paintDetail(WebPage *page, HttpRequest &request, String p2) {
 	if (count > 0) {
 		String tplPath = manager->modulePath + "/task/detail_tpl.html";
 		if (tpl->open(tplPath)) {
-			bool flag = true;
+			flag = true;
 			int taskId = query->getFieldValue(0, "id").toInt();
 			int owner = query->getFieldValue(0, "owner").toInt();
 			String name = query->getFieldValue(0, "name");
