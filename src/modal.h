@@ -1,22 +1,22 @@
 #pragma once
 
-#include "cjCms.h"
+#include "cjCMS.h"
 
 namespace cj {
 
 class Modal {
-	String modalId;
-	WebTemplate *tplIndex;
-	String tag;
-	String caption; 
-	String content;
-	String buttons;
+    String modalId;
+    WebTemplate *tplIndex;
+    String tag;
+    String caption;
+    String content;
+    String buttons;
 public:
-	Modal(String modalId, WebTemplate *tpl, String tag);
-	virtual void setCaption(String caption);
-	virtual void setContent(String content);
-	virtual void setButtons(String buttons);
-	virtual void paint();
+    Modal(String modalId, WebTemplate *tpl, String tag);
+    virtual void setCaption(String caption);
+    virtual void setContent(String content);
+    virtual void setButtons(String buttons);
+    virtual void paint();
 };
 
 }

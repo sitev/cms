@@ -1,4 +1,4 @@
-#include "cjCms.h"
+#include "cjCMS.h"
 
 namespace cj {
 
@@ -7,25 +7,25 @@ namespace cj {
 //--------------------------------------------------------------------------------------------------
 
 WebStudioModule::WebStudioModule(SiteManager *manager) : WebModule(manager) {
-	setOptionsFromDB(11);
+    setOptionsFromDB(11);
 }
 
 void WebStudioModule::paint(WebPage *page, HttpRequest &request) {
-	String p2 = request.header.GET.getValue("p2");
-	if (p2 == "") paintIndex(page, request);
-	else if (p2 == "site") paintSite(page, request);
-	else if (p2 == "mobile") paintMobile(page, request);
-	else if (p2 == "desktop") paintDesktop(page, request);
-	else if (p2 == "seo") paintSEO(page, request);
-	else if (p2 == "articles") paintArticles(page, request);
-	else if (p2 == "outsourcing") paintOutsourcing(page, request);
+    String p2 = request.header.GET.getValue("p2");
+    if (p2 == "") paintIndex(page, request);
+    else if (p2 == "site") paintSite(page, request);
+    else if (p2 == "mobile") paintMobile(page, request);
+    else if (p2 == "desktop") paintDesktop(page, request);
+    else if (p2 == "seo") paintSEO(page, request);
+    else if (p2 == "articles") paintArticles(page, request);
+    else if (p2 == "outsourcing") paintOutsourcing(page, request);
 }
 
 void WebStudioModule::paintIndex(WebPage *page, HttpRequest &request) {
-	WebTemplate *tpl = new WebTemplate();
-	if (!tpl->open(manager->modulePath + "/webstudio/tpl.html")) return;
-	tpl->exec();
-	page->out("content", tpl->html);
+    WebTemplate *tpl = new WebTemplate();
+    if (!tpl->open(manager->modulePath + "/webstudio/tpl.html")) return;
+    tpl->exec();
+    page->out("content", tpl->html);
 }
 
 void WebStudioModule::paintSite(WebPage *page, HttpRequest &request) {

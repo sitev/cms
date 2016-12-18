@@ -1,4 +1,4 @@
-#include "cjCms.h"
+#include "cjCMS.h"
 
 namespace cj {
 
@@ -7,22 +7,22 @@ namespace cj {
 //--------------------------------------------------------------------------------------------------
 
 WebSite::WebSite(SiteManager *manager, string host, int siteId) {
-	this->manager = manager;
-	this->host = host;
-	this->siteId = siteId;
-	tplId = 0; //0 - êàñòîìíûé äèçàéí
-	mainPage = NULL;
+    this->manager = manager;
+    this->host = host;
+    this->siteId = siteId;
+    tplId = 0; //0 - ĞºĞ°ÑÑ‚Ğ¾Ğ¼Ğ½Ñ‹Ğ¹ Ğ´Ğ¸Ğ·Ğ°Ğ¹Ğ½
+    mainPage = NULL;
 }
 
 WebPage* WebSite::getPageById(int pageId) {
-	for (auto it = pages.begin(); it != pages.end(); it++)
-	{
-		WebPage *page = it->second;
-		if (page->pageId == pageId) {
-			return page;
-		}
-	}
-	return NULL;
+    for (auto it = pages.begin(); it != pages.end(); it++)
+    {
+        WebPage *page = it->second;
+        if (page->pageId == pageId) {
+            return page;
+        }
+    }
+    return NULL;
 }
 
 }

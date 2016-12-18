@@ -1,33 +1,33 @@
 #pragma once
 
-#include "cj.h"
+#include "cjCMS.h"
 
 namespace cj {
 
 class ParamItem : public Object {
 public:
-	String name;
-	String value;
-	ParamItem();
-	virtual void set(String name, String value);
+    String name;
+    String value;
+    ParamItem();
+    virtual void set(String name, String value);
 };
 
 class WebTemplate {
 public:
-	List lstTag;
-	String src, html;
+    List lstTag;
+    String src, html;
 
-	WebTemplate();
+    WebTemplate();
 
-	bool open(String url);
+    bool open(String url);
 
-	virtual void out(String tag, String s);
-	virtual String getTagValue(String tag);
-	virtual void clearTag(String tag);
-	virtual void clearAllTags();
+    virtual void out(String tag, String s);
+    virtual String getTagValue(String tag);
+    virtual void clearTag(String tag);
+    virtual void clearAllTags();
 
-	virtual void exec(String source, String &target);
-	virtual void exec();
+    virtual void exec(String source, String &target);
+    virtual void exec();
 };
 
 }

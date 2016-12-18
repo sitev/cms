@@ -1,0 +1,21 @@
+#pragma once
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+
+#include "../../cjCore/src/cj.h"
+#include "../../cjMySQL/src/cjMySQL.h"
+#include "../../cjNetwork/src/cjNetwork.h"
+
+#include "webModule.h"
+#include "webPage.h"
+#include "webSite.h"
+#include "webstudio.h"
+#include "webTemplate.h"
+#include "widget.h"
+#include "builderModule.h"
+#include "taskModule.h"
+#include "connectionPool.h"
+#include "modal.h"
+#include "siteManager.h"
+#include "userModule.h"

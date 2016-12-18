@@ -1,7 +1,6 @@
 #pragma once
 
-#include "cj.h"
-#include "cjCms.h"
+#include "cjCMS.h"
 
 namespace cj {
 
@@ -11,20 +10,20 @@ enum UserType { utNone, utAdmin, tuUser };
 
 class UserModule : public WebModule {
 public:
-	UserModule(SiteManager *manager);
-	String generateContent(WebPage *page, HttpRequest &request);
+    UserModule(SiteManager *manager);
+    String generateContent(WebPage *page, HttpRequest &request);
 
-	virtual void paint(WebPage *page, HttpRequest &request);
-	virtual void paintAbout(WebPage *page, HttpRequest &request);
-	virtual void paintRecovery(WebPage *page, HttpRequest &request);
-	virtual void paintSignup(WebPage *page, HttpRequest &request);
+    virtual void paint(WebPage *page, HttpRequest &request);
+    virtual void paintAbout(WebPage *page, HttpRequest &request);
+    virtual void paintRecovery(WebPage *page, HttpRequest &request);
+    virtual void paintSignup(WebPage *page, HttpRequest &request);
 
-	virtual void sendAccount(WebPage *page, HttpRequest &request);
+    virtual void sendAccount(WebPage *page, HttpRequest &request);
 
-	virtual void activate(WebPage *page, HttpRequest &request);
-	virtual void changePassword(WebPage *page, HttpRequest &request);
+    virtual void activate(WebPage *page, HttpRequest &request);
+    virtual void changePassword(WebPage *page, HttpRequest &request);
 
-	virtual void ajax(WebPage *page, HttpRequest &request);
+    virtual void ajax(WebPage *page, HttpRequest &request);
 };
 
 }
