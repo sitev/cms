@@ -43,7 +43,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>C:\projects\libraries\boost;..\..\..\..\libraries\mysqlconn\include;..\..\..\cjNetwork\src;..\..\..\cjMySQL\src;..\..\..\cjCore\src;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\projects\libraries\boost\stage\lib;C:\projects\libraries\mysqlconn\lib;..\..\..\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>Debug;C:\projects\libraries\boost\stage\lib;C:\projects\libraries\mysqlconn\lib;..\..\..\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -94,6 +94,7 @@
     <ClCompile Include="..\..\src\webPage.cpp" />
     <ClCompile Include="..\..\src\webSite.cpp" />
     <ClCompile Include="..\..\src\webstudio.cpp" />
+    <ClCompile Include="..\..\src\websurf.cpp" />
     <ClCompile Include="..\..\src\webTemplate.cpp" />
     <ClCompile Include="..\..\src\widget.cpp" />
   </ItemGroup>
@@ -109,6 +110,7 @@
     <ClInclude Include="..\..\src\webPage.h" />
     <ClInclude Include="..\..\src\webSite.h" />
     <ClInclude Include="..\..\src\webstudio.h" />
+    <ClInclude Include="..\..\src\websurf.h" />
     <ClInclude Include="..\..\src\webTemplate.h" />
     <ClInclude Include="..\..\src\widget.h" />
   </ItemGroup>

@@ -94,6 +94,9 @@ void SiteManager::initModules() {
 
 	wm = new TaskModule(this);
 	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+	wm = new WebSurf(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
 }
 
 MySQL* SiteManager::newQuery() {
