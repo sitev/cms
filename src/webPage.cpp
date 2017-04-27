@@ -46,6 +46,7 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 	paintTemplates();
 
 	site->manager->paintMainMenu(site->siteId, tplIndex);
+	site->manager->paintLoginModal(tplIndex);
 	this->module->paint(this, request);
 	site->manager->widgetManager.paintPageWidgets(this);
 
@@ -101,6 +102,12 @@ void WebPage::paintTemplates() {
 					}
 				}
 			}
+		}
+		else {
+			fn = site->manager->documentRoot + "/sites/" + (String)site->siteId + "/index_tpl.html";
+			string fn8 = fn.to_string();
+			if (tplIndex->open(fn)) flag = true;
+
 		}
 		
 		/*
@@ -158,6 +165,7 @@ void WebPage::clearAllTags() {
 	tplIndex->clearTag("keywords");
 	tplIndex->clearTag("description");
 	tplIndex->clearTag("user");
+	tplIndex->clearTag("body");
 	tplIndex->clearTag("content");
 	tplIndex->clearTag("sidebar");
 	tplIndex->clearTag("sidebar2");

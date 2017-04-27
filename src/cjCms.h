@@ -7,6 +7,7 @@
 #include "siteManager.h"
 #include "connectionPool.h"
 #include "webSite.h"
+#include "websurf.h"
 #include "webstudio.h"
 #include "builderModule.h"
 #include "taskModule.h"

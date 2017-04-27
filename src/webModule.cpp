@@ -231,8 +231,11 @@ void NewsModule::paintNews(WebPage *page, HttpRequest &request) {
 		}
 
 		tplWrite->out("url", url);
+		tplWrite->out("url", "123");
 		tplWrite->exec();
 		tpl->out("out", tplWrite->html);
+
+		delete tplWrite;
 	}
 
 	tpl->out("caption", caption);

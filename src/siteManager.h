@@ -43,6 +43,7 @@ public:
 
 	virtual void paintItem(int siteId, int itemId, WebTemplate *tpl);
 	virtual void paintMainMenu(int siteId, WebTemplate *tpl);
+	virtual void paintLoginModal(WebTemplate *tpl);
 	virtual void paintPage(HttpRequest &request, HttpResponse &response);
 
 	String generateUserPassword();

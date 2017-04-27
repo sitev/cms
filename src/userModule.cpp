@@ -21,6 +21,7 @@ void UserModule::paint(WebPage *page, HttpRequest &request) {
 	if (p2 == "") paintAbout(page, request);
 	else if (p2 == "recovery") paintRecovery(page, request);
 	else if (p2 == "signup") paintSignup(page, request);
+	else if (p2 == "reset") reset(page, request);
 	else if (p2 == "sendAccount") sendAccount(page, request);
 	else if (p2 == "activate") activate(page, request);
 	else if (p2 == "changePassword") changePassword(page, request);
@@ -59,6 +60,49 @@ void UserModule::paintSignup(WebPage *page, HttpRequest &request) {
 		page->out("content", tpl->html);
 	}
 }
+
+void UserModule::reset(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+	String guid = generateUUID();
+	String email = request.header.POST.getValue("email");
+	if (email != "") {
+		String password = manager->generateUserPassword();
+		String sql = "select * from users where email='" + email + "'";
+		if (query->exec(sql)) {
+			if (query->storeResult()) {
+				int count = query->getRowCount();
+				if (count > 0) {
+					guid = query->getFieldValue(0, "uuid");
+					sql = "update users set newPassword='" + password + "', uuid='" + guid + "' where email='" + email + "'";
+					if (query->exec(sql)) {}
+				}
+				else {
+					sql = "insert into users (email, newPassword, uuid) values('" + email + "', '" + password + "', '" + guid + "')";
+					if (query->exec(sql)) {}
+				}
+			}
+		}
+		WebTemplate * tplEmail = new WebTemplate();
+		String userTpl = "email_tpl.html";
+		if (tplEmail->open(manager->modulePath + "/user/" + userTpl)) {
+			tplEmail->out("host", page->site->host);
+			tplEmail->out("email", email);
+			tplEmail->out("password", password);
+			tplEmail->out("guid", guid);
+			tplEmail->exec();
+			sendMail(email, "no-reply@" + page->site->host, page->site->host + ": подтверждение аккаунта", tplEmail->html);
+		}
+
+		WebTemplate * tpl = new WebTemplate();
+		if (tpl->open(manager->modulePath + "/user/loginSendAccount_tpl.html")) {
+			tpl->out("out", email);
+			tpl->exec();
+			page->out("content", tpl->html);
+		}
+	}
+	manager->deleteQuery(query);
+}
+
 void UserModule::sendAccount(WebPage *page, HttpRequest &request) {
 	MySQL *query = manager->newQuery();
 	String guid = generateUUID();
@@ -272,22 +316,34 @@ void UserModule::ajax(WebPage *page, HttpRequest &request) {
 					}
 				}
 			}
+			page->tplIndex->out("out", "</note>\n");
 		}
 		else if (func == "logout") {
-			/*
-			String login = request.header.POST.getValue("login");
-			if (login != "") {
-				int userId = getUserId(login);
+			if (uuid != "") {
+				int userId = manager->getUserId(uuid);
 				String sql = (String)"delete from uuid where userId='" + (String)userId + "'";
-				page->tplIndex->out("out", "<login>" + login + "</login>\n");
 				if (query->exec(sql)) {
+					page->tplIndex->out("out", "<note>\n");
 					page->tplIndex->out("out", "<result>1</result>");
+					page->tplIndex->out("out", "</note>\n");
 				}
 			}
-			*/
 		}
-		page->tplIndex->out("out", "</note>\n");
+		else if (func == "isEmailExist") ajaxIsEmailExist(page, request);
 	}
+	manager->deleteQuery(query);
+}
+
+void UserModule::ajaxIsEmailExist(WebPage *page, HttpRequest &request) {
+	MySQL *query = manager->newQuery();
+
+	String email = request.header.POST.getValue("email");
+	String sql = (String)"select id from users where (email='" + email + "')";
+	string sql8 = sql.to_string();
+	if (query->active(sql) > 0) {
+		page->tplIndex->out("out", "<note>\n<result>1</result></note>\n");
+	}
+
 	manager->deleteQuery(query);
 }
 

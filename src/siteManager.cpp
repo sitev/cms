@@ -275,6 +275,14 @@ void SiteManager::paintMainMenu(int siteId, WebTemplate *tpl) {
 	deleteQuery(query);
 }
 
+void SiteManager::paintLoginModal(WebTemplate *tpl) {
+	WebTemplate tplLogin;
+	if (tplLogin.open(modulePath + "/user/loginModal_tpl.html")) {
+		tplLogin.exec();
+		tpl->out("body", tplLogin.html);
+	}
+}
+
 void SiteManager::paintPage(HttpRequest &request, HttpResponse &response) {
 	string host = request.header.getValue("Host").to_string();
 	printf("host = %s\n", host.c_str());

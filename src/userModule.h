@@ -19,12 +19,14 @@ public:
 	virtual void paintRecovery(WebPage *page, HttpRequest &request);
 	virtual void paintSignup(WebPage *page, HttpRequest &request);
 
+	virtual void reset(WebPage *page, HttpRequest &request);
 	virtual void sendAccount(WebPage *page, HttpRequest &request);
 
 	virtual void activate(WebPage *page, HttpRequest &request);
 	virtual void changePassword(WebPage *page, HttpRequest &request);
 
 	virtual void ajax(WebPage *page, HttpRequest &request);
+	virtual void ajaxIsEmailExist(WebPage *page, HttpRequest &request);
 };
 
 }
