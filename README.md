@@ -1,5 +1,5 @@
-# cjCms is free C++ CMS
+# cms
 
-cjCms is free C++ CMS.
+C++ CMS - Content management system
 
 http://sitev.ru
