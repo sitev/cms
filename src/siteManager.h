@@ -1,9 +1,9 @@
 #pragma once
 
-#include "cj.h"
-#include "cjCms.h"
+#include "core.h"
+#include "cms.h"
 
-namespace cj {
+namespace cms {
 
 class SiteManager;
 

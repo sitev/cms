@@ -1,8 +1,9 @@
 #pragma once
 
-#include "cj.h"
+#include "core.h"
+using namespace core;
 
-namespace cj {
+namespace cms {
 
 class ParamItem : public Object {
 public:

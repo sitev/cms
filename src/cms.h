@@ -1,6 +1,11 @@
-#include "cj.h"
-#include "cjNetwork.h"
-#include "cjMySQL.h"
+#include "core.h"
+using namespace core;
+#include "network.h"
+using namespace network;
+#include "mysql.h"
+using namespace mysql;
+#include "webserver.h"
+using namespace webserver;
 
 #include "modal.h"
 

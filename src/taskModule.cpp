@@ -1,6 +1,6 @@
-#include "cjCms.h"
+#include "cms.h"
 
-namespace cj {
+namespace cms {
 
 TaskModule::TaskModule(SiteManager *manager) : WebModule(manager) {
 	setOptionsFromDB(12);

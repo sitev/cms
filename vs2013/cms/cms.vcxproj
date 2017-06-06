@@ -14,7 +14,7 @@
     <ProjectGuid>{12E17978-806B-42AA-B921-F11DC51B9DBA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>cjCms</RootNamespace>
-    <ProjectName>Cms</ProjectName>
+    <ProjectName>cms</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -42,7 +42,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\projects\libraries\boost;..\..\..\..\libraries\mysqlconn\include;..\..\..\cjNetwork\src;..\..\..\cjMySQL\src;..\..\..\cjCore\src;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\core\src;..\..\..\network\src;..\..\..\mysql\src;..\..\..\libraries\mysqlconn\include;..\..\..\libraries\boost;$(IncludePath)</IncludePath>
     <LibraryPath>Debug;C:\projects\libraries\boost\stage\lib;C:\projects\libraries\mysqlconn\lib;..\..\..\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -84,7 +84,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\builderModule.cpp" />
-    <ClCompile Include="..\..\src\cjCms.cpp" />
+    <ClCompile Include="..\..\src\cms.cpp" />
     <ClCompile Include="..\..\src\connectionPool.cpp" />
     <ClCompile Include="..\..\src\modal.cpp" />
     <ClCompile Include="..\..\src\siteManager.cpp" />
@@ -100,7 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\builderModule.h" />
-    <ClInclude Include="..\..\src\cjCms.h" />
+    <ClInclude Include="..\..\src\cms.h" />
     <ClInclude Include="..\..\src\connectionPool.h" />
     <ClInclude Include="..\..\src\modal.h" />
     <ClInclude Include="..\..\src\siteManager.h" />

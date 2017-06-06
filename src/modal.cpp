@@ -1,6 +1,6 @@
-#include "cjCms.h"
+#include "cms.h"
 
-namespace cj {
+namespace cms {
 
 Modal::Modal(String modalId, WebTemplate *tpl, String tag) {
 	this->modalId = modalId;

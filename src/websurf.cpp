@@ -1,6 +1,6 @@
-#include "cjCms.h"
+#include "cms.h"
 
-namespace cj {
+namespace cms {
 
 WebSurf::WebSurf(SiteManager *manager) : WebModule(manager) {
 	setOptionsFromDB(13);

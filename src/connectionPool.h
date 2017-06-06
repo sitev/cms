@@ -1,11 +1,12 @@
 #pragma once
 
-#include "cj.h"
-#include "cjCms.h"
+#include "core.h"
+#include "mysql.h"
+#include "cms.h"
 
-#include "vector"
+#include <vector>
 
-namespace cj {
+namespace cms {
 
 class Connection {
 public:
