@@ -326,7 +326,7 @@ String SiteManager::generateUserPassword() {
 	String symbols = "123456789ABCDEFGHIJKLMNPQRSTUVWXYZ";
 	String password = "";
 	for (int i = 0; i < count; i++) {
-		int rnd = (int)(random() * (symbols.getLength() - 1));
+		int rnd = (int)(::random() * (symbols.getLength() - 1));
 		password += symbols.getCharString(rnd);
 	}
 	return password;

@@ -7,6 +7,8 @@ using namespace cms;
 #pragma comment(lib, "mysql.lib")
 #pragma comment(lib, "libmysql.lib")
 #pragma comment(lib, "webserver.lib")
+
+#pragma comment(lib, "Ole32.lib")
 #endif
 
 int main(int argc, char* argv[])

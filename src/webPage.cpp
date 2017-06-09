@@ -1,4 +1,4 @@
-///#include <sys/stat.h>
+#include <fstream>
 #include "cms.h"
 
 namespace cms {
@@ -133,8 +133,9 @@ void WebPage::paintTemplates() {
 	}
 	if (!flag) {
 		fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
-		struct stat buf;
-		if ((stat(fn.to_string().c_str(), &buf)) != 0) {
+		if (!fstream(fn.to_string().c_str()).good())
+//		struct stat buf;
+//		if ((stat("qwerty"/*fn.to_string().c_str()*/, &buf)) != 0) {
 			fn = site->manager->documentRoot + "/common/index_tpl.html";
 		}
 		string fn8 = fn.to_string();

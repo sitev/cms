@@ -1,8 +1,5 @@
 #pragma once
 
-#include "core.h"
-#pragma once
-
 #include "cms.h"
 
 namespace cms {
