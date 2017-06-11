@@ -110,33 +110,13 @@ void WebPage::paintTemplates() {
 			if (tplIndex->open(fn)) flag = true;
 
 		}
-		
-		/*
-		String sTheme = "/css/";
-		if (theme > 0) {
-			sql = "select theme from themes where id='" + (String)theme + "'";
-			if (query->active(sql) > 0) {
-				sTheme = query->getFieldValue(0, "theme");
-				sTheme = "https://bootswatch.com/" + sTheme + "/";
-			}
-		}
-		*/
-
-		/*
-		if (design != "") {
-			fn = site->manager->documentRoot + "/design/" + (String)site->siteId + "/" + design + "_tpl.html";
-			tplIndex->out("theme", "/css/");
-		}
-		else tplIndex->out("theme", sTheme);
-		*/
-
 		tplIndex->out("caption", caption);
 	}
 	if (!flag) {
 		fn = site->manager->documentRoot + "/" + site->host + "/index_tpl.html";
-		if (!fstream(fn.to_string().c_str()).good())
 //		struct stat buf;
 //		if ((stat("qwerty"/*fn.to_string().c_str()*/, &buf)) != 0) {
+		if (!fstream(fn.to_string().c_str()).good()) {
 			fn = site->manager->documentRoot + "/common/index_tpl.html";
 		}
 		string fn8 = fn.to_string();
