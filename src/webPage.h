@@ -1,7 +1,5 @@
 #pragma once
 
-#include "cms.h"
-
 namespace cms {
 
 class WebSite;

@@ -1,10 +1,9 @@
 #pragma once
 
-#include "cms.h"
-
 namespace cms {
 
 class SiteManager;
+class WebPage;
 
 class WebSite {
 public:

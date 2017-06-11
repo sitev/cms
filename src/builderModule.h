@@ -1,8 +1,5 @@
 #pragma once
 
-#include "core.h"
-#include "cms.h"
-
 namespace cms {
 
 class SiteManager;
