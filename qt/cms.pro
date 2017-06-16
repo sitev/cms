@@ -3,11 +3,91 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-INCLUDEPATH += ../../core/src
-INCLUDEPATH += ../../network/src
-INCLUDEPATH += ../../mysql/src
-INCLUDEPATH += ../../libraries/mysqlconn/include
-INCLUDEPATH += ../../webserver/src
+#INCLUDEPATH += ../../core/src
+#INCLUDEPATH += ../../network/src
+#INCLUDEPATH += ../../mysql/src
+##INCLUDEPATH += ../../libraries/mysqlconn/include
+#INCLUDEPATH += ../../lib/mysql-connector-c/include
+#INCLUDEPATH += ../../webserver/src
+
+
+# core lib
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../core/qt/release/ -lcore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../core/qt/debug/ -lcore
+else:unix: LIBS += -L$$PWD/../../core/qt/ -lcore
+
+INCLUDEPATH += $$PWD/../../core/src
+DEPENDPATH += $$PWD/../../core/src
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../core/qt/release/libcore.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../core/qt/debug/libcore.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../core/qt/release/core.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../core/qt/debug/core.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../../core/qt/libcore.a
+
+# network lib
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../network/qt/release/ -lnetwork
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../network/qt/debug/ -lnetwork
+else:unix: LIBS += -L$$PWD/../../network/qt/ -lnetwork
+
+INCLUDEPATH += $$PWD/../../network/src
+DEPENDPATH += $$PWD/../../network/src
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../network/qt/release/libnetwork.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../network/qt/debug/libnetwork.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../network/qt/release/network.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../network/qt/debug/network.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../../network/qt/libnetwork.a
+
+# mysql lib
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../mysql/qt/release/ -lmysql
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../mysql/qt/debug/ -lmysql
+else:unix: LIBS += -L$$PWD/../../mysql/qt/ -lmysql
+
+INCLUDEPATH += $$PWD/../../mysql/src
+DEPENDPATH += $$PWD/../../mysql/src
+INCLUDEPATH += ../../lib/mysql-connector-c/include
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../mysql/qt/release/libmysql.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../mysql/qt/debug/libmysql.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../mysql/qt/release/mysql.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../mysql/qt/debug/mysql.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../../mysql/qt/libmysql.a
+
+# mysql-connector-c lib
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../lib/mysql-connector-c/lib/release/ -lmysqlclient
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../lib/mysql-connector-c/lib/debug/ -lmysqlclient
+else:unix: LIBS += -L$$PWD/../../lib/mysql-connector-c/lib/ -lmysqlclient
+
+INCLUDEPATH += $$PWD/../../lib/mysql-connector-c/include
+DEPENDPATH += $$PWD/../../lib/mysql-connector-c/include
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/release/libmysqlclient.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/debug/libmysqlclient.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/release/mysqlclient.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/debug/mysqlclient.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/libmysqlclient.a
+
+# webserver lib
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../webserver/qt/release/ -lwebserver
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../webserver/qt/debug/ -lwebserver
+else:unix: LIBS += -L$$PWD/../../webserver/qt/ -lwebserver
+
+INCLUDEPATH += $$PWD/../../webserver/src
+DEPENDPATH += $$PWD/../../webserver/src
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../webserver/qt/release/libwebserver.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../webserver/qt/debug/libwebserver.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../webserver/qt/release/webserver.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../webserver/qt/debug/webserver.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../../webserver/qt/libwebserver.a
+
+# other
+
+unix: LIBS += -lpthread -luuid
+
+
 
 SOURCES += \
     ../src/builderModule.cpp \
@@ -41,9 +121,3 @@ HEADERS += \
     ../src/webTemplate.h \
     ../src/widget.h
 
-LIBS += \
-    -L../../core/qt/debug \
-    -L../../network/qt/debug \
-    -L../../libraries/mysqlconn/lib \
-    -L../../mysql/qt/debug \
-    -L../../webserver/qt/debug
