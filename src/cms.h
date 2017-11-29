@@ -22,5 +22,6 @@ using namespace webserver;
 #include "taskModule.h"
 #include "userModule.h"
 #include "websurf.h"
+#include "shop.h"
 
 

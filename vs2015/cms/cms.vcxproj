@@ -87,6 +87,7 @@
     <ClCompile Include="..\..\src\cms.cpp" />
     <ClCompile Include="..\..\src\connectionPool.cpp" />
     <ClCompile Include="..\..\src\modal.cpp" />
+    <ClCompile Include="..\..\src\shop.cpp" />
     <ClCompile Include="..\..\src\siteManager.cpp" />
     <ClCompile Include="..\..\src\taskModule.cpp" />
     <ClCompile Include="..\..\src\userModule.cpp" />
@@ -103,6 +104,7 @@
     <ClInclude Include="..\..\src\cms.h" />
     <ClInclude Include="..\..\src\connectionPool.h" />
     <ClInclude Include="..\..\src\modal.h" />
+    <ClInclude Include="..\..\src\shop.h" />
     <ClInclude Include="..\..\src\siteManager.h" />
     <ClInclude Include="..\..\src\taskModule.h" />
     <ClInclude Include="..\..\src\userModule.h" />

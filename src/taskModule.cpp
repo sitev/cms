@@ -8,7 +8,6 @@ TaskModule::TaskModule(SiteManager *manager) : WebModule(manager) {
 
 void TaskModule::paint(WebPage *page, HttpRequest &request) {
 	String cmd = request.header.GET.getValue("cmd");
-	string cmd_8 = cmd.to_string();
 	if (cmd == "ajax")
 		return ajax(page, request);
 
