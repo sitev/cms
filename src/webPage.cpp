@@ -17,6 +17,8 @@ WebPage::WebPage(WebSite *site, string page, int pageId, WebModule *module, Stri
 	moduleId = 0; //0 - никакой модуль не привязан
 	tplIndex = new WebTemplate();
 	tplLayout = new WebTemplate();
+
+	loadOptions();
 }
 
 void WebPage::out(String s) {
@@ -171,6 +173,16 @@ void WebPage::paintUser(String uuid) {
 	tpl->exec();
 
 	tplIndex->out("user", tpl->html);
+}
+
+void WebPage::loadOptions() {
+	MySQL *query = site->manager->newQuery();
+	String sql = "select * from pages where id='" + (String)pageId + "'";
+	if (query->active(sql) > 0) {
+		buttons_in_line = query->getFieldValue(0, "buttons_in_line").toInt();
+		through_cursor = query->getFieldValue(0, "through_cursor").toInt();
+	}
+	site->manager->deleteQuery(query);
 }
 
 

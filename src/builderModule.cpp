@@ -144,7 +144,7 @@ void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 	WebTemplate *tplSub = new WebTemplate();
 	if (tplSub->open(tplPath)) {
 		paintModules(tplSub);
-		String sql = "select p.id, p.url, p.layout, p.isMainPage, m.name, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
+		String sql = "select p.id, p.url, p.layout, p.isMainPage, m.name, p.title, p.description, p.keywords, p.buttons_in_line, p.through_cursor from pages p, modules m where p.moduleId=m.id and siteId='" +
 			(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id";
 		string sql8 = sql.to_string();
 		int count = query->active(sql);
@@ -154,15 +154,17 @@ void BuilderModule::paintPages(int siteId, WebTemplate *tpl) {
 			int iMainPage = query->getFieldValue(i, "isMainPage").toInt();
 			bool isMainPage = iMainPage;
 			String moduleName = query->getFieldValue(i, "name");
-			String design = query->getFieldValue(i, "design");
+			String layout = query->getFieldValue(i, "layout");
 			String title = query->getFieldValue(i, "title");
 			String description = query->getFieldValue(i, "description");
 			String keywords = query->getFieldValue(i, "keywords");
+			String buttons_in_line = query->getFieldValue(i, "buttons_in_line");
+			String through_cursor = query->getFieldValue(i, "through_cursor");
 
 			//if (isMainPage) url = "!" + url;
 
-			tplSub->out("pages", "<tr id='" + (String)pageId + "'><td>" + (String)(i + 1) + "</td><td>" + url + "</td><td>" + moduleName + "</td><td>" + design + "</td><td>" +
-				title + "</td><td>" + description + "</td><td>" + keywords + "</td></tr>");
+			tplSub->out("pages", "<tr id='" + (String)pageId + "'><td>" + (String)(i + 1) + "</td><td>" + url + "</td><td>" + moduleName + "</td><td>" + layout + "</td><td>" +
+				title + "</td><td>" + description + "</td><td>" + keywords + "</td><td>" + buttons_in_line + "</td><td>" + through_cursor + "</td></tr>");
 		}
 
 		tplSub->exec();
@@ -650,9 +652,9 @@ void BuilderModule::ajaxEditPage(WebPage *page, HttpRequest &request) {
 	String title = request.header.POST.getValue("title");
 	String description = request.header.POST.getValue("description");
 	String keywords = request.header.POST.getValue("keywords");
+	String buttons_in_line = request.header.POST.getValue("buttons_in_line");
+	String through_cursor = request.header.POST.getValue("through_cursor");
 
-	//String sql = "select p.id, p.url, m.name, p.layout, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
-	//	(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id limit " + (String)pageIndex + ", 1";
 	String sql = "select p.id, p.url, p.layout, p.isMainPage, m.name, p.title, p.description, p.keywords from pages p, modules m where p.moduleId=m.id and siteId='" +
 		(String)siteId + "' and deleted=0 order by p.isMainPage desc, p.sorting, p.id limit " + (String)pageIndex + ", 1";
 	string sql8 = sql.to_string();
@@ -663,7 +665,8 @@ void BuilderModule::ajaxEditPage(WebPage *page, HttpRequest &request) {
 
 	if (pageId > 0) {
 		sql = "update pages set url='" + url + "', moduleId='" + (String)moduleId + "', layout='" + (String)layout +
-			"', title='" + title + "', description='" + description + "', keywords='" + keywords + "' where siteId='" + (String)siteId + "' and id='" + (String)pageId + "'";
+			"', title='" + title + "', description='" + description + "', keywords='" + keywords + 
+			"', buttons_in_line='" + buttons_in_line + "', through_cursor='" + through_cursor  + "' where siteId='" + (String)siteId + "' and id='" + (String)pageId + "'";
 		string sql8 = sql.to_string();
 		if (query->exec(sql)) {
 			page->tplIndex->out("out", "<note>\n");

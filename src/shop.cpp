@@ -13,7 +13,7 @@ namespace cms {
 		if (cmd == "ajax")
 			return ajax(page, request);
 
-		p1 = request.header.GET.getValue("p2");
+		p1 = request.header.GET.getValue("p1");
 		p2 = request.header.GET.getValue("p2");
 		
 		if (p2 == "category") paintCategory(page, request);
@@ -74,10 +74,6 @@ namespace cms {
 
 		WebTemplate tplContent; 
 		if (tplContent.open(manager->modulePath + "/shop/createCategory_tpl.html")) {
-			tplContent.out("customer", email);
-			tplContent.out("executor", email);
-			tplContent.out("customerId", userId);
-			tplContent.out("executorId", userId);
 			tplContent.exec();
 		}
 		WebTemplate tplButtons;
@@ -94,10 +90,6 @@ namespace cms {
 
 		WebTemplate tplContentDelete;
 		if (tplContentDelete.open(manager->modulePath + "/shop/deleteCategory_tpl.html")) {
-			tplContentDelete.out("customer", email);
-			tplContentDelete.out("executor", email);
-			tplContentDelete.out("hidCustomerId", userId);
-			tplContentDelete.out("hidExecutorId", userId);
 			tplContentDelete.exec();
 		}
 		WebTemplate tplButtonsDelete;
@@ -136,48 +128,13 @@ namespace cms {
 				int parent = query->getFieldValue(0, "parent").toInt();
 				String name = query->getFieldValue(0, "name");
 				String about = query->getFieldValue(0, "about");
-				String customer = query->getFieldValue(0, "customer");
-				int customerId = query->getFieldValue(0, "customerId").toInt();
-				String executor = query->getFieldValue(0, "executor");
-				int executorId = query->getFieldValue(0, "executorId").toInt();
-				String visibility = query->getFieldValue(0, "visibility");
-				String status = query->getFieldValue(0, "status");
-				int procent = query->getFieldValue(0, "procent").toInt();
-				bool is_project = query->getFieldValue(0, "is_project").toInt();
-				int time = query->getFieldValue(0, "time").toInt();
-				String timeUnit = query->getFieldValue(0, "time_unit");
-				String complexity = query->getFieldValue(0, "complexity");
-				String priority = query->getFieldValue(0, "priority");
-				String creation = query->getFieldValue(0, "creation");
-				String deadline = query->getFieldValue(0, "deadline");
 
 				paintCategorySub(tpl, taskId, 0, false);
 
 				tpl->out("taskId", taskId);
 				tpl->out("name", name);
-				if (is_project) tpl->out("is-project", "checked");
 				tpl->out("about", about);
-				tpl->out("procent", procent);
-				tpl->out("customer", customer);
-				tpl->out("customerId", customerId);
-				tpl->out("executor", executor);
-				tpl->out("executorId", executorId);
-				tpl->out("visibility" + visibility, "selected");
-				tpl->out("time", time);
-				tpl->out("time" + timeUnit, "selected");
-				tpl->out("status" + status, "selected");
-				tpl->out("complexity" + complexity, "selected");
-				tpl->out("priority" + priority, "selected");
-				tpl->out("creation", creation);
-				tpl->out("deadline", deadline);
 
-				sql = "select id from task where owner='" + (String)taskId + "'";
-				if (query->exec(sql)) {
-					if (query->storeResult()) {
-						int count = query->getRowCount();
-						if (count != 0)	tpl->out("visible", "none");
-					}
-				}
 			}
 			manager->deleteQuery(query);
 		}
@@ -274,10 +231,6 @@ namespace cms {
 
 		WebTemplate tplContentDelete;
 		if (tplContentDelete.open(manager->modulePath + "/shop/deleteProduct_tpl.html")) {
-			tplContentDelete.out("customer", email);
-			tplContentDelete.out("executor", email);
-			tplContentDelete.out("hidCustomerId", userId);
-			tplContentDelete.out("hidExecutorId", userId);
 			tplContentDelete.exec();
 		}
 		WebTemplate tplButtonsDelete;

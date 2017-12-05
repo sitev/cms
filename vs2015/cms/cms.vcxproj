@@ -43,7 +43,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>..\..\..\core\src;..\..\..\network\src;..\..\..\mysql\src;..\..\..\webserver\src;..\..\..\libraries\mysqlconn\include;..\..\..\libraries\boost;$(IncludePath)</IncludePath>
-    <LibraryPath>Debug;C:\projects\libraries\boost\stage\lib;C:\projects\libraries\mysqlconn\lib;..\..\..\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\projects\cj\vs2015\cj\Debug;Debug;C:\projects\libraries\boost\stage\lib;C:\projects\libraries\mysqlconn\lib;..\..\..\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

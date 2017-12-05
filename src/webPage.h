@@ -17,6 +17,9 @@ public:
 	WebTemplate *tplIndex, *tplLayout;
 	bool isLayout;
 
+	bool buttons_in_line = false;
+	bool through_cursor = false;
+
 	WebPage(WebSite *site, string page, int pageId, WebModule *module = NULL, String design = "");
 
 	virtual void out(String s);
@@ -27,6 +30,7 @@ public:
 	virtual void paintStdTags();
 	virtual void clearAllTags();
 	virtual void paintUser(String uuid);
+	virtual void loadOptions();
 
 	virtual void paintAjax(HttpRequest &request);
 };
