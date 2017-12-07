@@ -7,7 +7,7 @@ namespace cms {
 		String uuid;
 		int userId;
 	public:
-		String p1, p2, p3, p4;
+		String p1, p2, p3, p4, p5;
 
 		Shop(SiteManager *manager);
 		virtual void paint(WebPage *page, HttpRequest &request);
@@ -33,6 +33,8 @@ namespace cms {
 		virtual void ajaxAcceptProduct(WebPage *page, HttpRequest &request);
 		virtual void ajaxAddProduct(WebPage *page, HttpRequest &request);
 		virtual void ajaxDeleteProduct(WebPage *page, HttpRequest &request);
+
+		virtual void api(WebPage *page, HttpRequest &request);
 
 	};
 }

@@ -100,6 +100,9 @@ void SiteManager::initModules() {
 
 	wm = new Shop(this);
 	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
+
+	wm = new Ascalini(this);
+	modules.insert(std::pair<int, WebModule*>(wm->moduleId, wm));
 }
 
 MySQL* SiteManager::newQuery() {

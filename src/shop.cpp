@@ -12,9 +12,9 @@ namespace cms {
 		String cmd = request.header.GET.getValue("cmd");
 		if (cmd == "ajax")
 			return ajax(page, request);
-
-		p1 = request.header.GET.getValue("p1");
 		p2 = request.header.GET.getValue("p2");
+		if (p2 == "api") 
+			return api(page, request);
 		
 		if (p2 == "category") paintCategory(page, request);
 		else if (p2 == "product") paintProduct(page, request);
@@ -467,5 +467,7 @@ namespace cms {
 
 		manager->deleteQuery(query);
 	}
+
+	void Shop::api(WebPage *page, HttpRequest &request) { }
 
 }

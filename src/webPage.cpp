@@ -45,6 +45,12 @@ void WebPage::paint(HttpRequest &request, HttpResponse &response) {
 		return;
 	}
 
+	String p2 = request.header.GET.getValue("p2");
+	if (p2 == "api") {
+		paintApi(request);
+		return;
+	}
+
 	clearAllTags();
 	paintTemplates();
 
@@ -211,6 +217,10 @@ void WebPage::paintAjax(HttpRequest &request) {
 	this->out("HTTP/1.1 200 OK\r\nContent-type: text/html; charset=UTF-8\r\n");
 	this->out("Content-Length: " + (String)len + "\r\n\r\n");
 	this->out(t);
+}
+
+void WebPage::paintApi(HttpRequest &request) {
+	paintAjax(request);
 }
 
 

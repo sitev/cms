@@ -33,6 +33,7 @@ public:
 	virtual void loadOptions();
 
 	virtual void paintAjax(HttpRequest &request);
+	virtual void paintApi(HttpRequest &request);
 };
 
 }

@@ -42,7 +42,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\..\core\src;..\..\..\network\src;..\..\..\mysql\src;..\..\..\webserver\src;..\..\..\libraries\mysqlconn\include;..\..\..\libraries\boost;$(IncludePath)</IncludePath>
+    <IncludePath>C:\projects\cms\src;C:\projects\cms_modules\ascalini;..\..\..\core\src;..\..\..\network\src;..\..\..\mysql\src;..\..\..\webserver\src;..\..\..\libraries\mysqlconn\include;..\..\..\libraries\boost;$(IncludePath)</IncludePath>
     <LibraryPath>C:\projects\cj\vs2015\cj\Debug;Debug;C:\projects\libraries\boost\stage\lib;C:\projects\libraries\mysqlconn\lib;..\..\..\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\cms_modules\ascalini\ascalini.cpp" />
     <ClCompile Include="..\..\src\builderModule.cpp" />
     <ClCompile Include="..\..\src\cms.cpp" />
     <ClCompile Include="..\..\src\connectionPool.cpp" />
@@ -100,6 +101,7 @@
     <ClCompile Include="..\..\src\widget.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\cms_modules\ascalini\ascalini.h" />
     <ClInclude Include="..\..\src\builderModule.h" />
     <ClInclude Include="..\..\src\cms.h" />
     <ClInclude Include="..\..\src\connectionPool.h" />
