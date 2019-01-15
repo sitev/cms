@@ -16,7 +16,7 @@ MySQL* ConnectionPool::init_connect() {
 		printf("!query->init()\n");
 		return NULL;
 	}
-	if (!query->connect("127.0.0.1", "root", "123qwe", "sitev")) {
+	if (!query->connect("127.0.0.1", "root", "", "sitev")) {
 		printf("!query->connect()\n");
 		return NULL;
 	}

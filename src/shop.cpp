@@ -6,14 +6,16 @@ namespace cms {
 	}
 
 	void Shop::paint(WebPage *page, HttpRequest &request) {
+		p1 = request.header.GET.getValue("p1");
+		p2 = request.header.GET.getValue("p2");
+
 		uuid = request.header.COOKIE.getValue("uuid");
 		userId = manager->getUserId(uuid);
 
 		String cmd = request.header.GET.getValue("cmd");
 		if (cmd == "ajax")
 			return ajax(page, request);
-		p2 = request.header.GET.getValue("p2");
-		if (p2 == "api") 
+		if (p2 == "api")
 			return api(page, request);
 		
 		if (p2 == "category") paintCategory(page, request);
@@ -42,7 +44,7 @@ namespace cms {
 
 			sql = "select p.name, p.about, c.name category, p.price from shop_products p, shop_category c where ";
 			sql += "p.category_id='" + to_string(parent) + "' and p.category_id=c.id and isnull(p.deleted) order by p.id";
-			paintProductRow(sql, tpl, 0, false);
+			paintProductRow(sql, page, tpl, 0, false);
 			tpl->exec();
 		}
 		page->out("content", tpl->html);
@@ -57,13 +59,17 @@ namespace cms {
 	}
 
 	void Shop::paintCategoryIndex(WebPage *page, HttpRequest &request) {
-		String tplPath = manager->modulePath + "/shop/category_tpl.html";
+		String tplPath;
+		if (page->buttons_in_line)
+			tplPath = manager->modulePath + "/shop/category_bil_tpl.html";
+		else
+			tplPath = manager->modulePath + "/shop/category_tpl.html";
 		WebTemplate *tpl = new WebTemplate();
 		if (tpl->open(tplPath)) {
 			MySQL *query = manager->newQuery();
 
 			String sql = "select * from shop_category where isnull(deleted) and isnull(parent) order by id";
-			paintCategoryRow(sql, tpl, 0, false);
+			paintCategoryRow(sql, page, tpl, 0, false);
 
 			tpl->exec();
 		}
@@ -129,7 +135,7 @@ namespace cms {
 				String name = query->getFieldValue(0, "name");
 				String about = query->getFieldValue(0, "about");
 
-				paintCategorySub(tpl, taskId, 0, false);
+				paintCategorySub(page, tpl, taskId, 0, false);
 
 				tpl->out("taskId", taskId);
 				tpl->out("name", name);
@@ -151,7 +157,7 @@ namespace cms {
 		page->out("javascript", "<script src=\"/modules/shop/edit.js\"></script>");
 	}
 
-	void Shop::paintCategoryRow(String sql, WebTemplate *tpl, int level, bool isShowOnlyProject) {
+	void Shop::paintCategoryRow(String sql, WebPage *page, WebTemplate *tpl, int level, bool isShowOnlyProject) {
 		//tpl->out("content", "paintRow ");
 		MySQL *query = manager->newQuery();
 		if (query->exec(sql)) {
@@ -171,19 +177,26 @@ namespace cms {
 					s += "<a href='/" + p1 + "/" + (String)categoryId + "'>";
 					if (name != "") s += name + "<br>";
 					if (about != "") s += "<small>" + about + "</small>";
-					s += "</a></div></td></tr>\n";
+					s += "</a></div></td>";
+					if (page->buttons_in_line) {
+						s += "<td><input type='button' id='btnAddTask' class='btn btn-primary btn-sm' value='Добавить'>";
+						s += "<input id='btnAddSubTask' type='button' class='btn btn-primary btn-sm' value='Добавить внутрь'>";
+						s += "<input id='btnEditTask' type='button' class='btn btn-danger btn-sm' value='Правка'>";
+						s += "<input id='btnDeleteTask' type='button' class='btn btn-danger btn-sm' value='Удалить'></td>";
+					}
+					s += "</tr>\n";
 					tpl->out("content", s);
-					paintCategorySub(tpl, categoryId, level + 1, isShowOnlyProject);
+					paintCategorySub(page, tpl, categoryId, level + 1, isShowOnlyProject);
 				}
 			}
 		}
 		manager->deleteQuery(query);
 	}
 
-	void Shop::paintCategorySub(WebTemplate *tpl, int categoryId, int level, bool isShowOnlyProject) {
+	void Shop::paintCategorySub(WebPage *page, WebTemplate *tpl, int categoryId, int level, bool isShowOnlyProject) {
 		String sql = "select * from shop_category where parent = '" + (String)categoryId +
 			"' and isnull(deleted) order by id";
-		paintCategoryRow(sql, tpl, level, isShowOnlyProject);
+		paintCategoryRow(sql, page, tpl, level, isShowOnlyProject);
 	}
 
 	void Shop::paintProduct(WebPage *page, HttpRequest &request) {
@@ -199,8 +212,8 @@ namespace cms {
 		if (tpl->open(tplPath)) {
 			MySQL *query = manager->newQuery();
 
-			String sql = "select p.name, p.about, c.name category, p.price from shop_products p, shop_category c where p.category_id=c.id and isnull(p.deleted) order by p.id";
-			paintProductRow(sql, tpl, 0, false);
+			String sql = "select p.id, p.name, p.about, c.name category, p.price from shop_products p, shop_category c where p.category_id=c.id and isnull(p.deleted) order by p.id";
+			paintProductRow(sql, page, tpl, 0, false);
 
 			tpl->exec();
 		}
@@ -291,28 +304,35 @@ namespace cms {
 		page->out("javascript", "<script src=\"/modules/shop/edit.js\"></script>");
 	}
 
-	void Shop::paintProductRow(String sql, WebTemplate *tpl, int level, bool isShowOnlyProject) {
+	void Shop::paintProductRow(String sql, WebPage *page, WebTemplate *tpl, int level, bool isShowOnlyProject) {
 		MySQL *query = manager->newQuery();
 		if (query->exec(sql)) {
 			if (query->storeResult()) {
 				int count = query->getRowCount();
 				count = count;
 				for (int i = 0; i < count; i++) {
-					int categoryId = query->getFieldValue(i, "id").toInt();
-					int parent = query->getFieldValue(i, "parent").toInt();
+					int id = query->getFieldValue(i, "id").toInt();
+					int parent = 0;
 					String name = query->getFieldValue(i, "name");
 					String about = query->getFieldValue(i, "about");
 					String category = query->getFieldValue(i, "category");
 					int price = query->getFieldValue(i, "price").toInt();
 
-					String s = "<tr class='treegrid-" + (String)categoryId;
+					String s = "<tr class='treegrid-" + (String)id;
 					if (parent != 0 && (i != 0 || level != 0)) s += " treegrid-parent-" + (String)parent;
 
-					s += "' style='cursor:pointer' data-id='" + (String)categoryId + "'>\n<td><span class='treegrid-expander'></span><div style='display: inline-block;'>";
-					s += "<a href='/" + p1 + "/" + (String)categoryId + "'>";
+					String url = (String)"/" + p1 + "/" + p2 + "/" + (String)id;
+					s += "' style='cursor:pointer' data-id='" + (String)id + "'>\n<td><span class='treegrid-expander'></span><div style='display: inline-block;'>";
+					s += (String)"<a href='/" + p1 + "/" + p2 + "/edit/" + (String)id + "'>";
 					if (name != "") s += name + "<br>";
 					if (about != "") s += "<small>" + about + "</small>";
-					s += "</a></div></td><td>" + category + "</td><td>" + to_string(price) + "</td></tr>\n";
+					s += "</a></div></td><td>" + category + "</td><td>" + to_string(price) + "</td>";
+					if (page->buttons_in_line) {
+						s += "<td><nobr><input type='button' id='btnAddTask' data-id='" + (String)id + "' class='btn btn-primary btn-sm' value='Добавить'>";
+						s += "<input id='btnEditTask' data-id='" + (String)id + "' type='button' class='btn btn-danger btn-sm' value='Правка'>";
+						s += "<input id='btnDeleteTask' data-id='" + (String)id + "' type='button' class='btn btn-danger btn-sm' value='Удалить'></nobr></td>";
+					}
+					s += "</tr>\n";
 					tpl->out("content", s);
 					//paintProductSub(tpl, categoryId, level + 1, isShowOnlyProject);
 				}
@@ -361,6 +381,8 @@ namespace cms {
 			else if (p3 == "add") ajaxAddProduct(page, request);
 			else if (p3 == "delete") ajaxDeleteProduct(page, request);
 		}
+		else if (p2 == "uploadfiles") 
+			ajaxUploadFiles(page, request);
 	}
 
 	void Shop::ajaxAcceptCategory(WebPage *page, HttpRequest &request) {
@@ -467,6 +489,8 @@ namespace cms {
 
 		manager->deleteQuery(query);
 	}
+
+	void Shop::ajaxUploadFiles(WebPage *page, HttpRequest &request) {}
 
 	void Shop::api(WebPage *page, HttpRequest &request) { }
 

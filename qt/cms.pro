@@ -3,12 +3,13 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-#INCLUDEPATH += ../../core/src
-#INCLUDEPATH += ../../network/src
-#INCLUDEPATH += ../../mysql/src
-##INCLUDEPATH += ../../libraries/mysqlconn/include
-#INCLUDEPATH += ../../lib/mysql-connector-c/include
-#INCLUDEPATH += ../../webserver/src
+INCLUDEPATH += ../../core/src
+INCLUDEPATH += ../../logger/src
+INCLUDEPATH += ../../application/src
+INCLUDEPATH += ../../network/src
+INCLUDEPATH += ../../mysql/src
+INCLUDEPATH += ../../lib/mysqlconn/include
+INCLUDEPATH += ../../webserver/src
 
 
 # core lib
@@ -24,6 +25,37 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../core/
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../core/qt/release/core.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../core/qt/debug/core.lib
 else:unix: PRE_TARGETDEPS += $$PWD/../../core/qt/libcore.a
+
+# logger lib
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../logger/qt/release/ -llogger
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../logger/qt/debug/ -llogger
+else:unix:!macx: LIBS += -L$$PWD/../../logger/qt/ -llogger
+
+INCLUDEPATH += $$PWD/../../logger/src
+DEPENDPATH += $$PWD/../../logger/src
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../logger/qt/release/liblogger.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../logger/qt/debug/liblogger.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../logger/qt/release/logger.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../logger/qt/debug/logger.lib
+else:unix:!macx: PRE_TARGETDEPS += $$PWD/../../logger/qt/liblogger.a
+
+# application lib
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../application/qt/application/release/ -lapplication
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../application/qt/application/debug/ -lapplication
+else:unix:!macx: LIBS += -L$$PWD/../../application/qt/application/ -lapplication
+
+INCLUDEPATH += $$PWD/../../application/src
+DEPENDPATH += $$PWD/../../application/src
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../application/qt/application/release/libapplication.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../application/qt/application/debug/libapplication.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../application/qt/application/release/application.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../application/qt/application/debug/application.lib
+else:unix:!macx: PRE_TARGETDEPS += $$PWD/../../application/qt/application/libapplication.a
+
 
 # network lib
 
@@ -47,7 +79,7 @@ else:unix: LIBS += -L$$PWD/../../mysql/qt/ -lmysql
 
 INCLUDEPATH += $$PWD/../../mysql/src
 DEPENDPATH += $$PWD/../../mysql/src
-INCLUDEPATH += ../../lib/mysql-connector-c/include
+INCLUDEPATH += ../../../lib/mysqlconn/include
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../mysql/qt/release/libmysql.a
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../mysql/qt/debug/libmysql.a
@@ -56,18 +88,21 @@ else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../.
 else:unix: PRE_TARGETDEPS += $$PWD/../../mysql/qt/libmysql.a
 
 # mysql-connector-c lib
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../lib/mysql-connector-c/lib/release/ -lmysqlclient
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../lib/mysql-connector-c/lib/debug/ -lmysqlclient
-else:unix: LIBS += -L$$PWD/../../lib/mysql-connector-c/lib/ -lmysqlclient
 
-INCLUDEPATH += $$PWD/../../lib/mysql-connector-c/include
-DEPENDPATH += $$PWD/../../lib/mysql-connector-c/include
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/release/libmysqlclient.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/debug/libmysqlclient.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/release/mysqlclient.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/debug/mysqlclient.lib
-else:unix: PRE_TARGETDEPS += $$PWD/../../lib/mysql-connector-c/lib/libmysqlclient.a
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../lib/mysqlconn/lib/ -llibmysql
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../lib/mysqlconn/lib/ -llibmysql
+else:unix:!macx: LIBS += -L$$PWD/../../../lib/mysqlconn/lib/ -llibmysql
+
+INCLUDEPATH += $$PWD/../../../lib/mysqlconn/include
+DEPENDPATH += $$PWD/../../../lib/mysqlconn/include
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../lib/mysqlconn/lib/liblibmysql.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../lib/mysqlconn/lib/liblibmysqld.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../lib/mysqlconn/lib/libmysql.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../lib/mysqlconn/lib/libmysql.lib
+else:unix:!macx: PRE_TARGETDEPS += $$PWD/../../../lib/mysqlconn/lib/liblibmysql.a
+
 
 # webserver lib
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../webserver/qt/release/ -lwebserver
@@ -103,7 +138,8 @@ SOURCES += \
     ../src/webstudio.cpp \
     ../src/websurf.cpp \
     ../src/webTemplate.cpp \
-    ../src/widget.cpp
+    ../src/widget.cpp \
+    ../src/shop.cpp
 
 HEADERS += \
     ../src/builderModule.h \
@@ -119,5 +155,7 @@ HEADERS += \
     ../src/webstudio.h \
     ../src/websurf.h \
     ../src/webTemplate.h \
-    ../src/widget.h
+    ../src/widget.h \
+    ../src/shop.h
+
 

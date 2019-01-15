@@ -4,6 +4,7 @@
 
 namespace cms {
 	class Shop : public WebModule {
+	protected:
 		String uuid;
 		int userId;
 	public:
@@ -16,13 +17,13 @@ namespace cms {
 		virtual void paintCategory(WebPage *page, HttpRequest &request);
 		virtual void paintCategoryIndex(WebPage *page, HttpRequest &request);
 		virtual void paintCategoryEdit(WebPage *page, HttpRequest &request);
-		virtual void paintCategoryRow(String sql, WebTemplate *tpl, int level, bool isShowOnlyProject);
-		virtual void paintCategorySub(WebTemplate *tpl, int categoryId, int level, bool isShowOnlyProject);
+		virtual void paintCategoryRow(String sql, WebPage *page, WebTemplate *tpl, int level, bool isShowOnlyProject);
+		virtual void paintCategorySub(WebPage *page, WebTemplate *tpl, int categoryId, int level, bool isShowOnlyProject);
 
 		virtual void paintProduct(WebPage *page, HttpRequest &request);
 		virtual void paintProductIndex(WebPage *page, HttpRequest &request);
 		virtual void paintProductEdit(WebPage *page, HttpRequest &request);
-		virtual void paintProductRow(String sql, WebTemplate *tpl, int level, bool isShowOnlyProject);
+		virtual void paintProductRow(String sql, WebPage *page, WebTemplate *tpl, int level, bool isShowOnlyProject);
 		virtual void paintProductSelectCategoryRow(String sql, WebTemplate *tpl, int level);
 
 
@@ -33,6 +34,7 @@ namespace cms {
 		virtual void ajaxAcceptProduct(WebPage *page, HttpRequest &request);
 		virtual void ajaxAddProduct(WebPage *page, HttpRequest &request);
 		virtual void ajaxDeleteProduct(WebPage *page, HttpRequest &request);
+		virtual void ajaxUploadFiles(WebPage *page, HttpRequest &request);
 
 		virtual void api(WebPage *page, HttpRequest &request);
 

@@ -1,11 +1,15 @@
 #include "cms.h"
 using namespace cms;
 
+int a = 1;
+
 #ifdef OS_WINDOWS
 #pragma comment(lib, "core.lib")
 #pragma comment(lib, "network.lib")
 #pragma comment(lib, "mysql.lib")
 #pragma comment(lib, "libmysql.lib")
+#pragma comment(lib, "logger.lib")
+#pragma comment(lib, "application.lib")
 #pragma comment(lib, "webserver.lib")
 
 #pragma comment(lib, "Ole32.lib")
@@ -24,6 +28,5 @@ int main(int argc, char* argv[])
 	sm->setHandler(handler);
 
 	sm->run();
-
 	return 0;
 }

@@ -135,17 +135,17 @@ void WebPage::paintTemplates() {
 }
 
 void WebPage::paintStdTags() {
-	tplIndex->out("css", "<link href='/css/tabs.css' rel='stylesheet'>");
-	tplIndex->out("css", "<link href='/css/style.css' rel='stylesheet'>");
-	tplIndex->out("css", "<link href=\"/plugin/summernote/summernote.css\" rel=\"stylesheet\">");
-	tplIndex->out("css", "<link href=\"/plugin/jquery-treegrid/css/jquery.treegrid.css\" rel=\"stylesheet\">");
+	tplIndex->out("css", "<link href='/css/tabs.css' rel='stylesheet'>\n");
+	tplIndex->out("css", "<link href='/css/style.css' rel='stylesheet'>\n");
+	tplIndex->out("css", "<link href=\"/plugin/summernote/summernote.css\" rel=\"stylesheet\">\n");
+	tplIndex->out("css", "<link href=\"/plugin/jquery-treegrid/css/jquery.treegrid.css\" rel=\"stylesheet\">\n");
 
 	tplIndex->out("javascript", "<script src='/js/user.js'></script>\n");
 	tplIndex->out("javascript", "<script src='/js/others.js'></script>\n");
 
-	tplIndex->out("javascript", "<script src=\"/plugin/summernote/summernote.min.js\"></script>");
-	tplIndex->out("javascript", "<script src=\"/plugin/jquery-treegrid/js/jquery.treegrid.js\"></script>");
-	tplIndex->out("javascript", "<script src=\"/plugin/jquery-treegrid/js/jquery.treegrid.bootstrap3.js\"></script>");
+	tplIndex->out("javascript", "<script src=\"/plugin/summernote/summernote.min.js\"></script>\n");
+	tplIndex->out("javascript", "<script src=\"/plugin/jquery-treegrid/js/jquery.treegrid.js\"></script>\n");
+	tplIndex->out("javascript", "<script src=\"/plugin/jquery-treegrid/js/jquery.treegrid.bootstrap3.js\"></script>\n");
 
 	tplIndex->out("javascript", "<script src='/js/common.js'></script>\n");
 }
@@ -162,6 +162,7 @@ void WebPage::clearAllTags() {
 	tplIndex->clearTag("caption");
 	tplIndex->clearTag("menu");
 	tplIndex->clearTag("theme");
+	tplIndex->clearTag("css");
 	tplIndex->clearTag("javascript");
 }
 
